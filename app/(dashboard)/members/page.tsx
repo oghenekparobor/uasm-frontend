@@ -50,13 +50,31 @@ export default function MembersPage() {
     setPage(1);
   };
 
+  // Transform filters to match backend API expectations
+  const transformedFilters: Record<string, any> = {};
+  
+  // Handle birthday date range
+  if (filters.birthday?.start || filters.birthday?.end) {
+    if (filters.birthday.start) {
+      transformedFilters.birthdayFrom = filters.birthday.start;
+    }
+    if (filters.birthday.end) {
+      transformedFilters.birthdayTo = filters.birthday.end;
+    }
+  }
+
+  // Handle class IDs (multi-select)
+  if (filters.classIds && Array.isArray(filters.classIds) && filters.classIds.length > 0) {
+    transformedFilters.currentClassIds = filters.classIds;
+  }
+
   const params = {
     page,
     limit,
     search: search || undefined,
-    sort: sortKey,
-    order: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
-    ...filters,
+    sortBy: sortKey,
+    sortOrder: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
+    ...transformedFilters,
   };
 
   const { data: members, loading, error, meta, refetch } =

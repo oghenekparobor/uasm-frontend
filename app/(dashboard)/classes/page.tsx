@@ -4,11 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { classesApi } from '@/lib/api-services';
 import { usePaginatedApi } from '@/hooks/use-api';
+import { useAuthStore } from '@/store/auth-store';
+import { ROLES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
 import { ClassForm } from '@/components/forms/class-form';
 import { DataTable, type Column, type SortDirection, ExportButton } from '@/components/tables';
+import { FilterPanel, type FilterOption, PresetManager } from '@/components/filters';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Class {
   id: string;
@@ -20,18 +24,46 @@ interface Class {
 
 export default function ClassesPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [sortKey, setSortKey] = useState<string>();
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [filters, setFilters] = useState<Record<string, any>>({});
+
+  const isAdmin = user?.role === ROLES.SUPER_ADMIN || user?.role === ROLES.ADMIN;
+
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setSearch('');
+    setPage(1);
+  };
+
+  const handleApplyPreset = (presetFilters: Record<string, any>) => {
+    setFilters(presetFilters);
+    setPage(1);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+  };
 
   const params = {
     page,
     limit,
+    search: search || undefined,
     sort: sortKey,
     order: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
+    ...filters,
   };
 
   const { data: classes, loading, error, meta, refetch } = usePaginatedApi(
@@ -44,6 +76,24 @@ export default function ClassesPage() {
     setSortDirection(direction);
     setPage(1);
   };
+
+  const filterOptions: FilterOption[] = [
+    {
+      type: 'multi-select',
+      key: 'types',
+      label: 'Class Types',
+      options: [
+        { value: 'PLATOON', label: 'Platoon' },
+        { value: 'CHILDREN', label: 'Children Class' },
+      ],
+    },
+    {
+      type: 'text',
+      key: 'name',
+      label: 'Class Name',
+      placeholder: 'Filter by name...',
+    },
+  ];
 
   const columns: Column<Class>[] = [
     {
@@ -62,10 +112,10 @@ export default function ClassesPage() {
       ),
     },
     {
-      key: 'capacity',
-      header: 'Capacity',
-      sortable: true,
-      render: (cls) => cls.capacity || 'N/A',
+      key: '_count',
+      header: 'Members',
+      sortable: false,
+      render: (cls) => cls._count?.members || 0,
     },
     {
       key: 'description',
@@ -83,9 +133,45 @@ export default function ClassesPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Classes</h1>
-          <p className="text-gray-600">Manage classes and platoons.</p>
+          <p className="text-gray-600">
+            {isAdmin ? 'Manage classes and platoons.' : 'View your assigned classes.'}
+          </p>
         </div>
+        {isAdmin && (
         <Button onClick={() => setIsCreateModalOpen(true)}>Add Class</Button>
+        )}
+      </div>
+
+      {/* Search and Filters */}
+      <div className="mb-6 space-y-4">
+        <Card>
+          <CardContent className="p-4">
+            <form onSubmit={handleSearch} className="flex gap-4">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search classes..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              />
+              <Button type="submit">Search</Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center gap-2">
+          <FilterPanel
+            filters={filterOptions}
+            values={filters}
+            onChange={handleFilterChange}
+            onClear={handleClearFilters}
+          />
+          <PresetManager
+            pageKey="classes"
+            currentFilters={{ ...filters, search }}
+            onApplyPreset={handleApplyPreset}
+          />
+        </div>
       </div>
 
       <DataTable

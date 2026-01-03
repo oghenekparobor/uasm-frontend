@@ -11,7 +11,7 @@ export const allocateFoodSchema = z.object({
   classId: z.string().uuid('Class ID is required'),
   foodAllocated: z.number().int().min(0, 'Food allocated must be 0 or greater'),
   waterAllocated: z.number().int().min(0, 'Water allocated must be 0 or greater'),
-  allocationType: z.enum(['PER_MEMBER', 'FIXED_AMOUNT'], {
+  allocationType: z.enum(['DEFAULT', 'EXTRA'], {
     required_error: 'Allocation type is required',
   }),
 });

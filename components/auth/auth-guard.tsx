@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -13,9 +13,16 @@ interface AuthGuardProps {
 export function AuthGuard({ children, requiredRole, redirectTo = '/login' }: AuthGuardProps) {
   const router = useRouter();
   const { isAuthenticated, isLoading, user } = useAuthStore();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Wait for client-side mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    // Don't run checks until mounted and loading is complete
+    if (!isMounted || isLoading) return;
 
     // Check authentication
     if (!isAuthenticated || !user) {
@@ -31,9 +38,10 @@ export function AuthGuard({ children, requiredRole, redirectTo = '/login' }: Aut
         return;
       }
     }
-  }, [isAuthenticated, isLoading, user, requiredRole, router, redirectTo]);
+  }, [isMounted, isAuthenticated, isLoading, user, requiredRole, router, redirectTo]);
 
-  if (isLoading) {
+  // Show loading during mount or auth loading
+  if (!isMounted || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>

@@ -18,7 +18,7 @@ import { toast } from '@/hooks/use-toast';
 interface ConfirmReceiptFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (batchId?: string) => void;
 }
 
 export function ConfirmReceiptForm({
@@ -27,6 +27,8 @@ export function ConfirmReceiptForm({
   onSuccess,
 }: ConfirmReceiptFormProps) {
   const [loading, setLoading] = useState(false);
+  const [windows, setWindows] = useState<any[]>([]);
+  const [loadingWindows, setLoadingWindows] = useState(false);
 
   const {
     register,
@@ -38,12 +40,32 @@ export function ConfirmReceiptForm({
     mode: 'onChange', // Real-time validation
   });
 
+  // Fetch attendance windows when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setLoadingWindows(true);
+      attendanceApi
+        .getWindows()
+        .then((response) => {
+          setWindows(response.data || []);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch attendance windows:', error);
+          toast.error('Failed to load attendance windows');
+        })
+        .finally(() => {
+          setLoadingWindows(false);
+        });
+    }
+  }, [isOpen]);
+
   const onSubmit = async (data: ConfirmReceiptInput) => {
     try {
       setLoading(true);
-      await distributionApi.confirmReceipt(data);
+      const response = await distributionApi.confirmReceipt(data);
       toast.success('Receipt confirmed successfully');
-      onSuccess();
+      const batchId = response.data?.id;
+      onSuccess(batchId);
       onClose();
       reset();
     } catch (error: any) {
@@ -59,8 +81,9 @@ export function ConfirmReceiptForm({
         label="Attendance Window"
         {...register('attendanceWindowId')}
         error={errors.attendanceWindowId?.message}
+        disabled={loadingWindows}
         options={[
-          { value: '', label: 'Select attendance window' },
+          { value: '', label: loadingWindows ? 'Loading windows...' : 'Select attendance window' },
           ...windows.map((window) => ({
             value: window.id,
             label: `${new Date(window.sundayDate).toLocaleDateString()} ${
@@ -103,6 +126,7 @@ interface AllocateFoodFormProps {
   onSuccess: () => void;
   batchId: string;
   classId: string;
+  initialData?: any;
 }
 
 export function AllocateFoodForm({
@@ -111,8 +135,10 @@ export function AllocateFoodForm({
   onSuccess,
   batchId,
   classId,
+  initialData,
 }: AllocateFoodFormProps) {
   const [loading, setLoading] = useState(false);
+  const isEditing = !!initialData;
 
   const {
     register,
@@ -125,20 +151,45 @@ export function AllocateFoodForm({
     defaultValues: {
       distributionBatchId: batchId,
       classId,
+      foodAllocated: initialData?.foodAllocated || 0,
+      waterAllocated: initialData?.waterAllocated || 0,
+      allocationType: initialData?.allocationType || 'DEFAULT',
     },
     mode: 'onChange', // Real-time validation
   });
 
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setValue('foodAllocated', initialData.foodAllocated || 0);
+      setValue('waterAllocated', initialData.waterAllocated || 0);
+      setValue('allocationType', initialData.allocationType || 'PER_MEMBER');
+    }
+  }, [initialData, setValue]);
+
   const onSubmit = async (data: AllocateFoodInput) => {
     try {
       setLoading(true);
-      await distributionApi.allocateFood(batchId, classId, data);
+      const allocationData = {
+        foodAllocated: data.foodAllocated,
+        waterAllocated: data.waterAllocated,
+        allocationType: data.allocationType,
+      };
+      
+      if (isEditing && initialData?.id) {
+        // Update existing allocation
+        await distributionApi.updateAllocation(initialData.id, allocationData);
+        toast.success('Allocation updated successfully');
+      } else {
+        // Create new allocation
+        await distributionApi.allocateFood(batchId, classId, allocationData);
       toast.success('Allocation created successfully');
+      }
       onSuccess();
       onClose();
       reset();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to allocate food');
+      toast.error(error.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} allocation`);
     } finally {
       setLoading(false);
     }
@@ -167,8 +218,8 @@ export function AllocateFoodForm({
         error={errors.allocationType?.message}
         options={[
           { value: '', label: 'Select type' },
-          { value: 'PER_MEMBER', label: 'Per Member' },
-          { value: 'FIXED_AMOUNT', label: 'Fixed Amount' },
+          { value: 'DEFAULT', label: 'Default Allocation' },
+          { value: 'EXTRA', label: 'Extra Allocation' },
         ]}
       />
 
@@ -177,7 +228,7 @@ export function AllocateFoodForm({
           Cancel
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Allocating...' : 'Allocate'}
+          {loading ? (isEditing ? 'Updating...' : 'Allocating...') : (isEditing ? 'Update Allocation' : 'Allocate')}
         </Button>
       </div>
     </form>

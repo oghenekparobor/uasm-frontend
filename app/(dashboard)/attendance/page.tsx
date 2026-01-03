@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { attendanceApi } from '@/lib/api-services';
 import { useApi } from '@/hooks/use-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import { Modal } from '@/components/ui/modal';
 import { OpenWindowForm } from '@/components/forms/attendance-form';
 
 export default function AttendancePage() {
+  const router = useRouter();
   const [isOpenWindowModalOpen, setIsOpenWindowModalOpen] = useState(false);
   const { data: windows, loading, error, refetch } = useApi(
     attendanceApi.getWindows
@@ -132,7 +134,7 @@ export default function AttendancePage() {
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            (window.location.href = `/attendance/windows/${window.id}`)
+                            router.push(`/attendance/windows/${window.id}`)
                           }
                         >
                           View

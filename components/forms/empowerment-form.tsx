@@ -101,11 +101,10 @@ export function CreateEmpowermentForm({
         error={errors.type?.message}
         options={[
           { value: '', label: 'Select type' },
-          { value: 'SKILL_TRAINING', label: 'Skill Training' },
-          { value: 'BUSINESS_STARTUP', label: 'Business Startup' },
-          { value: 'EDUCATION', label: 'Education' },
-          { value: 'HEALTHCARE', label: 'Healthcare' },
-          { value: 'OTHER', label: 'Other' },
+          { value: 'SKILL', label: 'Skill' },
+          { value: 'MONEY', label: 'Money' },
+          { value: 'DRUG', label: 'Drug' },
+          { value: 'ITEM', label: 'Item' },
         ]}
       />
 

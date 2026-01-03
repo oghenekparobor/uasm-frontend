@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
-      isLoading: false, // Start as false, will be set during rehydration
+      isLoading: true, // Start as true during hydration
 
       setAuth: (data: LoginResponse) => {
         // Store access token in memory only
@@ -95,26 +95,46 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
-      onRehydrateStorage: () => async (state) => {
-        // After rehydration, set loading to false and update isAuthenticated
-        if (state) {
-          state.isLoading = false;
-          // Set isAuthenticated based on persisted user
-          if (state.user) {
-            state.isAuthenticated = true;
+      onRehydrateStorage: () => {
+        return async (state) => {
+          // After rehydration, handle token refresh if needed
+          if (!state) {
+            useAuthStore.setState({ isLoading: false });
+            return;
           }
           
-          // If we have a refresh token but no access token, try to refresh automatically
-          if (state.refreshToken && !state.accessToken && typeof window !== 'undefined') {
-            // Import and call refresh function
+          // If we have a refresh token, try to refresh automatically
+          if (state.refreshToken && typeof window !== 'undefined') {
             try {
               const { refreshAccessToken } = await import('@/lib/token-refresh');
-              await refreshAccessToken();
+              const newToken = await refreshAccessToken();
+              
+              // If refresh failed, clear auth
+              if (!newToken) {
+                useAuthStore.setState({
+                  user: null,
+                  isAuthenticated: false,
+                  refreshToken: null,
+                  isLoading: false,
+                });
+                return;
+              }
             } catch (error) {
               console.error('Failed to refresh token on rehydration:', error);
-            }
+              // Clear auth on refresh failure
+              useAuthStore.setState({
+                user: null,
+                isAuthenticated: false,
+                refreshToken: null,
+                isLoading: false,
+              });
+              return;
           }
         }
+          
+          // Always set loading to false after rehydration completes
+          useAuthStore.setState({ isLoading: false });
+        };
       },
     }
   )

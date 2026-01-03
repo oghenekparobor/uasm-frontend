@@ -15,11 +15,11 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  id: z.string().uuid(),
   email: z.string().email('Invalid email address').optional(),
-  firstName: z.string().min(1).max(100).optional(),
-  lastName: z.string().min(1).max(100).optional(),
-  phone: z.string().min(1).max(20).optional(),
+  firstName: z.string().min(1, 'First name is required').max(100).optional(),
+  lastName: z.string().min(1, 'Last name is required').max(100).optional(),
+  phone: z.string().min(1, 'Phone is required').max(20).optional(),
+  isActive: z.boolean().optional(),
 });
 
 export const assignRoleSchema = z.object({

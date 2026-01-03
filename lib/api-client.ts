@@ -3,6 +3,29 @@ import { getAccessToken, setAccessToken, useAuthStore } from '@/store/auth-store
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+// Helper to serialize array parameters for NestJS
+const paramsSerializer = (params: any): string => {
+  const searchParams = new URLSearchParams();
+  
+  Object.keys(params).forEach((key) => {
+    const value = params[key];
+    if (value === undefined || value === null) {
+      return;
+    }
+    
+    if (Array.isArray(value)) {
+      // For arrays, send multiple query params with the same key
+      value.forEach((item) => {
+        searchParams.append(key, String(item));
+      });
+    } else {
+      searchParams.append(key, String(value));
+    }
+  });
+  
+  return searchParams.toString();
+};
+
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_URL,
@@ -10,6 +33,7 @@ const apiClient: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true, // For httpOnly cookies
+  paramsSerializer,
 });
 
 // Request interceptor: Inject access token

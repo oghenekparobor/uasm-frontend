@@ -45,7 +45,13 @@ const navigationItems: NavItem[] = [
   {
     label: 'Classes',
     href: '/classes',
-    roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
+    roles: [
+      ROLES.SUPER_ADMIN,
+      ROLES.ADMIN,
+      ROLES.PLATOON_LEADER,
+      ROLES.ASSISTANT_PLATOON_LEADER,
+      ROLES.CHILDREN_TEACHER,
+    ],
   },
   {
     label: 'Users',

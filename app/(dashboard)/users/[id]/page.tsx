@@ -10,14 +10,70 @@ import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
 import { UserForm } from '@/components/forms/user-form';
+import { Select } from '@/components/ui/select';
+import { toast } from '@/hooks/use-toast';
+
+const AVAILABLE_ROLES = [
+  { id: 1, name: 'super_admin', label: 'Super Admin' },
+  { id: 2, name: 'admin', label: 'Admin' },
+  { id: 3, name: 'platoon_leader', label: 'Platoon Leader' },
+  { id: 4, name: 'assistant_platoon_leader', label: 'Assistant Platoon Leader' },
+  { id: 5, name: 'children_teacher', label: 'Children Teacher' },
+  { id: 6, name: 'kitchen', label: 'Kitchen' },
+  { id: 7, name: 'distribution', label: 'Distribution' },
+  { id: 8, name: 'worker', label: 'Worker' },
+];
 
 export default function UserDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
+  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
+  const [isAssigningRole, setIsAssigningRole] = useState(false);
   const { data: user, loading, error, refetch } = useApi(() =>
     usersApi.getOne(id)
+  );
+
+  const handleAssignRole = async () => {
+    if (!selectedRoleId) {
+      toast.error('Please select a role');
+      return;
+    }
+
+    try {
+      setIsAssigningRole(true);
+      await usersApi.assignRole(id, { roleId: parseInt(selectedRoleId) });
+      toast.success('Role assigned successfully');
+      setIsAddRoleModalOpen(false);
+      setSelectedRoleId('');
+      refetch();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to assign role');
+    } finally {
+      setIsAssigningRole(false);
+    }
+  };
+
+  const handleRemoveRole = async (roleId: number) => {
+    if (!confirm('Are you sure you want to remove this role?')) {
+      return;
+    }
+
+    try {
+      await usersApi.removeRole(id, roleId.toString());
+      toast.success('Role removed successfully');
+      refetch();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to remove role');
+    }
+  };
+
+  // Get roles that can be assigned (not already assigned)
+  const assignedRoleNames = user?.roles?.map((r: any) => r.role) || [];
+  const availableRolesToAssign = AVAILABLE_ROLES.filter(
+    (role) => !assignedRoleNames.includes(role.name)
   );
 
   if (loading) {
@@ -90,26 +146,45 @@ export default function UserDetailPage() {
         {/* Roles & Permissions */}
         <Card>
           <CardHeader>
+            <div className="flex items-center justify-between">
             <CardTitle>Roles & Permissions</CardTitle>
+              <Button
+                size="sm"
+                onClick={() => setIsAddRoleModalOpen(true)}
+                disabled={availableRolesToAssign.length === 0}
+              >
+                Add Role
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {user.roles && user.roles.length > 0 ? (
               <div>
                 <p className="text-sm text-gray-500 mb-2">Roles</p>
+              {user.roles && user.roles.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {user.roles.map((role: any) => (
-                    <span
-                      key={role.id}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-sm"
+                  {user.roles.map((userRole: any) => {
+                    const roleInfo = AVAILABLE_ROLES.find((r) => r.name === userRole.role);
+                    return (
+                      <div
+                        key={userRole.id}
+                        className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm group"
                     >
-                      {role.role}
-                    </span>
-                  ))}
-                </div>
+                        <span>{roleInfo?.label || userRole.role}</span>
+                        <button
+                          onClick={() => handleRemoveRole(userRole.id)}
+                          className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Remove role"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
               </div>
             ) : (
               <p className="text-sm text-gray-500">No roles assigned</p>
             )}
+            </div>
             <div>
               <p className="text-sm text-gray-500">Status</p>
               <p className="font-semibold">
@@ -161,6 +236,49 @@ export default function UserDetailPage() {
           }}
           initialData={user}
         />
+      </Modal>
+
+      {/* Add Role Modal */}
+      <Modal
+        isOpen={isAddRoleModalOpen}
+        onClose={() => {
+          setIsAddRoleModalOpen(false);
+          setSelectedRoleId('');
+        }}
+        title="Assign Role"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <Select
+            label="Select Role"
+            value={selectedRoleId}
+            onChange={(e) => setSelectedRoleId(e.target.value)}
+            options={[
+              { value: '', label: 'Choose a role...' },
+              ...availableRolesToAssign.map((role) => ({
+                value: role.id.toString(),
+                label: role.label,
+              })),
+            ]}
+          />
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddRoleModalOpen(false);
+                setSelectedRoleId('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAssignRole}
+              disabled={!selectedRoleId || isAssigningRole}
+            >
+              {isAssigningRole ? 'Assigning...' : 'Assign Role'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

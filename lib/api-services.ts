@@ -36,6 +36,15 @@ export const attendanceApi = {
       params: windowId ? { windowId } : {},
     }),
   getAll: (params?: any) => apiClient.get('/attendance', { params }),
+  // Individual member attendance
+  markMemberAttendance: (data: any) =>
+    apiClient.post('/attendance/members', data),
+  bulkMarkAttendance: (data: any) =>
+    apiClient.post('/attendance/members/bulk', data),
+  getClassMembersAttendance: (classId: string, windowId: string) =>
+    apiClient.get(`/attendance/classes/${classId}/windows/${windowId}/members`),
+  getMemberAttendanceHistory: (memberId: string, params?: any) =>
+    apiClient.get(`/attendance/members/${memberId}/history`, { params }),
 };
 
 // Classes
@@ -110,6 +119,14 @@ export const eventsApi = {
   recordAttendance: (id: string, data: any) =>
     apiClient.post(`/events/${id}/attendance`, data),
   getAttendance: (id: string) => apiClient.get(`/events/${id}/attendance`),
+};
+
+// Offerings & Tithe
+export const offeringsApi = {
+  getAll: (params?: any) => apiClient.get('/offerings', { params }),
+  getOne: (id: string) => apiClient.get(`/offerings/${id}`),
+  create: (data: any) => apiClient.post('/offerings', data),
+  update: (id: string, data: any) => apiClient.patch(`/offerings/${id}`, data),
 };
 
 // Requests

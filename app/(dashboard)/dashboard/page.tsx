@@ -210,6 +210,42 @@ export default function DashboardPage() {
         </Card>
       )}
 
+      {stats?.systemStats?.offeringsStats && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Offerings & Tithe Statistics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Total Records</p>
+                <p className="text-2xl font-bold">
+                  {stats.systemStats.offeringsStats.totalRecords}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Offering</p>
+                <p className="text-2xl font-bold">
+                  ₦{(stats.systemStats.offeringsStats.totalOffering || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Tithe</p>
+                <p className="text-2xl font-bold">
+                  ₦{(stats.systemStats.offeringsStats.totalTithe || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Combined</p>
+                <p className="text-2xl font-bold">
+                  ₦{(stats.systemStats.offeringsStats.totalCombined || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Recent Activity */}
       {stats?.recentActivity && stats.recentActivity.length > 0 && (
         <Card>

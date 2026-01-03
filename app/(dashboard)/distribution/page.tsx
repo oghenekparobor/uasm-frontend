@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { distributionApi } from '@/lib/api-services';
 import { useApi, usePaginatedApi } from '@/hooks/use-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import { Modal } from '@/components/ui/modal';
 import { ConfirmReceiptForm } from '@/components/forms/distribution-form';
 
 export default function DistributionPage() {
+  const router = useRouter();
   const [isConfirmReceiptModalOpen, setIsConfirmReceiptModalOpen] =
     useState(false);
   const { data: currentBatch, loading: batchLoading, refetch: refetchBatch } =
@@ -69,7 +71,9 @@ export default function DistributionPage() {
               <div>
                 <p className="text-sm text-gray-500">Date</p>
                 <p className="text-lg font-semibold">
-                  {new Date(currentBatch.sundayDate).toLocaleDateString()}
+                  {currentBatch.attendanceWindow?.sundayDate
+                    ? new Date(currentBatch.attendanceWindow.sundayDate).toLocaleDateString()
+                    : 'N/A'}
                 </p>
               </div>
               <div>
@@ -119,20 +123,24 @@ export default function DistributionPage() {
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-4 py-3 text-sm font-medium">
-                        {new Date(batch.sundayDate).toLocaleDateString()}
+                        {batch.attendanceWindow?.sundayDate
+                          ? new Date(batch.attendanceWindow.sundayDate).toLocaleDateString()
+                          : 'N/A'}
                       </td>
                       <td className="px-4 py-3 text-sm">{batch.totalFoodReceived}</td>
                       <td className="px-4 py-3 text-sm">{batch.totalWaterReceived}</td>
                       <td className="px-4 py-3 text-sm text-gray-500">
-                        {new Date(batch.createdAt).toLocaleDateString()}
+                        {batch.confirmedAt
+                          ? new Date(batch.confirmedAt).toLocaleDateString()
+                          : batch.createdAt
+                          ? new Date(batch.createdAt).toLocaleDateString()
+                          : 'N/A'}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            (window.location.href = `/distribution/batches/${batch.id}`)
-                          }
+                          onClick={() => router.push(`/distribution/batches/${batch.id}`)}
                         >
                           View
                         </Button>
@@ -156,10 +164,14 @@ export default function DistributionPage() {
         <ConfirmReceiptForm
           isOpen={isConfirmReceiptModalOpen}
           onClose={() => setIsConfirmReceiptModalOpen(false)}
-          onSuccess={() => {
+          onSuccess={(batchId) => {
             refetch();
             refetchBatch();
             setIsConfirmReceiptModalOpen(false);
+            // Redirect to batch detail page to allocate to classes
+            if (batchId) {
+              router.push(`/distribution/batches/${batchId}`);
+            }
           }}
         />
       </Modal>

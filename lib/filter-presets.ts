@@ -72,3 +72,4 @@ export function applyFilterPreset(preset: FilterPreset): Record<string, any> {
   return { ...preset.filters };
 }
 
+
