@@ -11,6 +11,7 @@ import { Modal } from '@/components/ui/modal';
 import { MemberForm } from '@/components/forms/member-form';
 import { DataTable, type Column, type SortDirection, ExportButton } from '@/components/tables';
 import { FilterPanel, type FilterOption, PresetManager } from '@/components/filters';
+import { formatDate } from '@/lib/utils/date';
 
 interface Member {
   id: string;
@@ -120,10 +121,7 @@ export default function MembersPage() {
     {
       key: 'birthday',
       header: 'Birthday',
-      render: (member) =>
-        member.birthday
-          ? new Date(member.birthday).toLocaleDateString()
-          : 'N/A',
+      render: (member) => formatDate(member.birthday),
     },
     {
       key: 'currentClass',
@@ -138,19 +136,19 @@ export default function MembersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Members</h1>
-          <p className="text-gray-600">Manage and view all members.</p>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">Members</h1>
+          <p className="text-gray-600 text-sm sm:text-base">Manage and view all members.</p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>Add Member</Button>
+        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full sm:w-auto">Add Member</Button>
       </div>
 
       {/* Search and Filters */}
       <div className="mb-6 space-y-4">
         <Card>
           <CardContent className="p-4">
-            <form onSubmit={handleSearch} className="flex gap-4">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <input
                 type="text"
                 value={search}
@@ -158,12 +156,12 @@ export default function MembersPage() {
                 placeholder="Search members..."
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               />
-              <Button type="submit">Search</Button>
+              <Button type="submit" className="w-full sm:w-auto">Search</Button>
             </form>
           </CardContent>
         </Card>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <FilterPanel
             filters={filterOptions}
             values={filters}

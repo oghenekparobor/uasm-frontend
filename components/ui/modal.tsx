@@ -43,26 +43,27 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
         className={cn(
-          'w-full rounded-lg bg-white shadow-xl',
+          'w-full rounded-lg bg-white shadow-xl my-auto',
           sizeClasses[size]
         )}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h2 className="text-xl font-semibold">{title}</h2>
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+          <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
           {showCloseButton && (
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-black transition-colors"
+              aria-label="Close"
             >
               <svg
-                className="h-6 w-6"
+                className="h-5 w-5 sm:h-6 sm:w-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -79,7 +80,7 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div className="p-6">{children}</div>
+        <div className="p-4 sm:p-6 max-h-[calc(100vh-200px)] overflow-y-auto">{children}</div>
       </div>
     </div>
   );
@@ -94,7 +95,7 @@ export function ModalFooter({ children, className }: ModalFooterProps) {
   return (
     <div
       className={cn(
-        'flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4',
+        'flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4',
         className
       )}
     >

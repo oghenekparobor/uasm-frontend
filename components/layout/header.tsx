@@ -1,26 +1,72 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuthStore();
   const router = useRouter();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     await logout();
     router.push('/login');
   };
 
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [userMenuOpen]);
+
   return (
-    <header className="fixed top-0 right-0 left-64 h-16 border-b border-gray-200 bg-white z-10">
-      <div className="flex h-full items-center justify-between px-6">
-        <div className="flex-1">
+    <header className="fixed top-0 right-0 left-0 lg:left-64 h-16 border-b border-gray-200 bg-white z-30">
+      <div className="flex h-full items-center justify-between px-4 sm:px-6">
+        {/* Mobile menu button */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 -ml-2 text-gray-600 hover:text-black active:text-black transition-colors relative z-50"
+          aria-label="Toggle menu"
+          type="button"
+        >
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+
+        <div className="flex-1 lg:flex-none">
           {/* Breadcrumbs or page title can go here */}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Notifications */}
           <button className="relative p-2 text-gray-600 hover:text-black transition-colors">
             <svg
@@ -40,16 +86,19 @@ export function Header() {
           </button>
 
           {/* User Menu */}
-          <div className="relative group">
-            <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-medium">
                 {user?.firstName?.[0] || user?.email[0].toUpperCase()}
               </div>
-              <span className="text-sm font-medium hidden md:block">
+              <span className="text-sm font-medium hidden sm:block">
                 {user?.firstName} {user?.lastName}
               </span>
               <svg
-                className="h-4 w-4 text-gray-500"
+                className="h-4 w-4 text-gray-500 hidden sm:block"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -64,22 +113,28 @@ export function Header() {
             </button>
 
             {/* Dropdown Menu */}
-            <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-              <div className="p-2">
-                <Link
-                  href="/profile"
-                  className="block px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
-                >
-                  Logout
-                </button>
+            {userMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg z-50">
+                <div className="p-2">
+                  <Link
+                    href="/profile"
+                    className="block px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

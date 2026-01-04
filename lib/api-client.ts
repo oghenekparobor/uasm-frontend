@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { getAccessToken, setAccessToken, useAuthStore } from '@/store/auth-store';
+import { getAccessToken, setAccessToken } from '@/store/auth-store';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -96,6 +96,8 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        // Lazy import to avoid circular dependency
+        const { useAuthStore } = await import('@/store/auth-store');
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
           // No refresh token available, logout user
@@ -136,6 +138,8 @@ apiClient.interceptors.response.use(
           // Refresh token is invalid/expired, or network error (no response)
           // Only logout on actual auth errors, not network issues
           if (isAuthError) {
+            // Lazy import to avoid circular dependency
+            const { useAuthStore } = await import('@/store/auth-store');
             useAuthStore.getState().clearAuth();
             if (typeof window !== 'undefined') {
               window.location.href = '/login';

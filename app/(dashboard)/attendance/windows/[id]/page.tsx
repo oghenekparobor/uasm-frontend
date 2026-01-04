@@ -16,29 +16,40 @@ export default function AttendanceWindowDetailPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [myClasses, setMyClasses] = useState<any[]>([]);
+  const [allClasses, setAllClasses] = useState<any[]>([]);
   const [attendanceOverview, setAttendanceOverview] = useState<any[]>([]);
   const [loadingOverview, setLoadingOverview] = useState(false);
+  
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   
   const { data: window, loading, error, refetch } = useApi(() =>
     attendanceApi.getWindow(id)
   );
 
-  // Fetch user's classes to show/hide "Take Attendance" button
+  // Fetch classes - user's classes for leaders, all classes for admins
   useEffect(() => {
     if (user?.id && window) {
       classesApi.getAll({ limit: 100 }).then((response) => {
-        const allClasses = response.data.data || [];
-        const userClasses = allClasses.filter((cls: any) =>
-          cls.classLeaders?.some((leader: any) => leader.user.id === user.id)
-        );
-        setMyClasses(userClasses);
+        const classes = response.data.data || [];
+        setAllClasses(classes);
+        
+        if (isAdmin) {
+          // Admins see all classes
+          setMyClasses(classes);
+        } else {
+          // Non-admins see only their assigned classes
+          const userClasses = classes.filter((cls: any) =>
+            cls.classLeaders?.some((leader: any) => leader.user.id === user.id)
+          );
+          setMyClasses(userClasses);
+        }
       }).catch((error) => {
         console.error('Failed to fetch classes:', error);
       });
     }
-  }, [user?.id, window]);
+  }, [user?.id, user?.role, window, isAdmin]);
 
-  // Fetch attendance overview for all classes
+  // Fetch attendance overview - all classes for admins, user's classes for others
   useEffect(() => {
     if (window && myClasses.length > 0) {
       setLoadingOverview(true);

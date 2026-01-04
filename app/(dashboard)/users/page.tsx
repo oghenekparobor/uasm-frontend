@@ -144,19 +144,19 @@ export default function UsersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Users</h1>
-          <p className="text-gray-600">Manage workers and their roles.</p>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">Users</h1>
+          <p className="text-gray-600 text-sm sm:text-base">Manage workers and their roles.</p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>Add User</Button>
+        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full sm:w-auto">Add User</Button>
       </div>
 
       {/* Search and Filters */}
       <div className="mb-6 space-y-4">
         <Card>
           <CardContent className="p-4">
-            <form onSubmit={handleSearch} className="flex gap-4">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <input
                 type="text"
                 value={search}
@@ -164,12 +164,12 @@ export default function UsersPage() {
                 placeholder="Search users by name or email..."
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               />
-              <Button type="submit">Search</Button>
+              <Button type="submit" className="w-full sm:w-auto">Search</Button>
             </form>
           </CardContent>
         </Card>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <FilterPanel
             filters={filterOptions}
             values={filters}

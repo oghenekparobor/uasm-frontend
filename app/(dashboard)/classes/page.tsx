@@ -130,15 +130,15 @@ export default function ClassesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Classes</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">Classes</h1>
+          <p className="text-gray-600 text-sm sm:text-base">
             {isAdmin ? 'Manage classes and platoons.' : 'View your assigned classes.'}
           </p>
         </div>
         {isAdmin && (
-        <Button onClick={() => setIsCreateModalOpen(true)}>Add Class</Button>
+        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full sm:w-auto">Add Class</Button>
         )}
       </div>
 
@@ -146,7 +146,7 @@ export default function ClassesPage() {
       <div className="mb-6 space-y-4">
         <Card>
           <CardContent className="p-4">
-            <form onSubmit={handleSearch} className="flex gap-4">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <input
                 type="text"
                 value={search}
@@ -154,12 +154,12 @@ export default function ClassesPage() {
                 placeholder="Search classes..."
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               />
-              <Button type="submit">Search</Button>
+              <Button type="submit" className="w-full sm:w-auto">Search</Button>
             </form>
           </CardContent>
         </Card>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <FilterPanel
             filters={filterOptions}
             values={filters}

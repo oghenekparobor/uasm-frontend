@@ -1,51 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { distributionApi, classesApi } from '@/lib/api-services';
+import { distributionApi } from '@/lib/api-services';
 import { useApi } from '@/hooks/use-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
 import { AllocateFoodForm } from '@/components/forms/distribution-form';
-import { toast } from '@/hooks/use-toast';
 
 export default function DistributionBatchDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const [classes, setClasses] = useState<any[]>([]);
-  const [loadingClasses, setLoadingClasses] = useState(false);
   const [allocationModalOpen, setAllocationModalOpen] = useState<string | null>(null);
   
   const { data: batch, loading, error, refetch } = useApi(() =>
     distributionApi.getBatch(id)
   );
+  const { data: classesWithAttendance, loading: loadingClasses, refetch: refetchClasses } = useApi(() =>
+    distributionApi.getClassesWithAttendance(id)
+  );
   const { data: allocations, refetch: refetchAllocations } = useApi(() =>
     distributionApi.getAllocations({ batchId: id })
   );
-
-  // Fetch all classes for allocation
-  useEffect(() => {
-    if (batch) {
-      setLoadingClasses(true);
-      classesApi
-        .getAll({ limit: 100 })
-        .then((response) => {
-          setClasses(response.data.data || []);
-        })
-        .catch((error) => {
-          console.error('Failed to fetch classes:', error);
-        })
-        .finally(() => {
-          setLoadingClasses(false);
-        });
-    }
-  }, [batch]);
 
   if (loading) {
     return (
@@ -185,14 +165,14 @@ export default function DistributionBatchDetailPage() {
             <div className="flex justify-center py-8">
               <LoadingSpinner size="lg" />
             </div>
-          ) : classes.length === 0 ? (
+          ) : !classesWithAttendance || !classesWithAttendance.classes || classesWithAttendance.classes.length === 0 ? (
             <p className="text-gray-500 text-center py-4">No classes available</p>
           ) : (
             <div className="space-y-4">
-              {classes.map((cls: any) => {
+              {classesWithAttendance.classes.map((cls: any) => {
                 const existingAllocation = allocations?.data?.find(
                   (a: any) => a.classId === cls.id
-                );
+                ) || cls.allocation;
                 
                 return (
                   <div
@@ -200,13 +180,38 @@ export default function DistributionBatchDetailPage() {
                     className="p-4 border border-gray-200 rounded-lg"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-semibold text-lg">{cls.name}</p>
                         <p className="text-sm text-gray-500">
-                          Type: {cls.type} | Members: {cls._count?.members || 0}
+                          Type: {cls.type} | Members: {cls.memberCount || 0}
                         </p>
+                        
+                        {/* Attendance Report */}
+                        {cls.attendance && (
+                          <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
+                            <p className="font-medium text-gray-700 mb-1">Attendance Report:</p>
+                            <div className="flex gap-4 text-xs">
+                              <span className="text-green-600">
+                                ✓ Present: {cls.attendance.present || 0}
+                              </span>
+                              <span className="text-red-600">
+                                ✗ Absent: {cls.attendance.absent || 0}
+                              </span>
+                              <span className="text-gray-600">
+                                ⊘ Unmarked: {cls.attendance.unmarked || 0}
+                              </span>
+                            </div>
+                            {(cls.attendance.marked || 0) === 0 && cls.attendance.totalMembers > 0 && (
+                              <p className="text-xs text-orange-600 mt-1">
+                                Attendance not yet taken for this window
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Allocation Status */}
                         {existingAllocation && (
-                          <p className="text-sm text-green-600 mt-1">
+                          <p className="text-sm text-green-600 mt-2">
                             Already allocated: Food {existingAllocation.foodAllocated} | Water{' '}
                             {existingAllocation.waterAllocated}
                           </p>
@@ -276,6 +281,7 @@ export default function DistributionBatchDetailPage() {
             onClose={() => setAllocationModalOpen(null)}
             onSuccess={() => {
               refetchAllocations();
+              refetchClasses();
               setAllocationModalOpen(null);
             }}
             batchId={id}

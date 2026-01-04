@@ -127,8 +127,9 @@ export function DataTable<T>({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-        <table className="w-full">
+      <div className="overflow-x-auto border border-gray-200 rounded-lg -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <table className="w-full min-w-[640px]">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {selectable && (
@@ -255,6 +256,7 @@ export function DataTable<T>({
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Pagination */}

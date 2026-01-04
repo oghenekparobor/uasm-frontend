@@ -25,7 +25,7 @@ export default function MemberDetailPage() {
   const { data: history } = useApi(() => membersApi.getHistory(id));
   const { data: logs, refetch: refetchLogs } = useApi(() => memberLogsApi.getByMember(id));
   // Fetch attendance records for the heatmap (using max allowed limit)
-  const { data: attendanceHistory, loading: attendanceLoading } = usePaginatedApi(
+  const { data: attendanceHistory, loading: attendanceLoading } = usePaginatedApi<any>(
     (params) => attendanceApi.getMemberAttendanceHistory(id, params),
     { page: 1, limit: 100, sortBy: 'markedAt', sortOrder: 'desc' }
   );
@@ -53,7 +53,7 @@ export default function MemberDetailPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <Button
             variant="outline"
@@ -62,16 +62,16 @@ export default function MemberDetailPage() {
           >
             ← Back
           </Button>
-          <h1 className="text-4xl font-bold mb-2">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">
             {member.firstName} {member.lastName}
           </h1>
-          <p className="text-gray-600">Member Profile</p>
+          <p className="text-gray-600 text-sm sm:text-base">Member Profile</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsCreateLogModalOpen(true)}>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={() => setIsCreateLogModalOpen(true)} className="w-full sm:w-auto">
             Create Log
           </Button>
-          <Button variant="outline" onClick={() => setIsEditModalOpen(true)}>
+          <Button variant="outline" onClick={() => setIsEditModalOpen(true)} className="w-full sm:w-auto">
             Edit
           </Button>
         </div>
@@ -179,7 +179,7 @@ export default function MemberDetailPage() {
               No attendance records found for this member.
             </p>
           ) : (
-            <AttendanceHeatmap records={attendanceHistory} />
+            <AttendanceHeatmap records={attendanceHistory || []} />
           )}
         </CardContent>
       </Card>

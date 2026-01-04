@@ -1,6 +1,22 @@
 import apiClient from './api-client';
 import type { PaginatedResponse, PaginationMeta } from '@/types/api';
 
+// Auth
+export const authApi = {
+  login: (credentials: { email: string; password: string }) =>
+    apiClient.post('/auth/login', credentials),
+  refresh: (refreshToken: string) =>
+    apiClient.post('/auth/refresh', { refreshToken }),
+  logout: () => apiClient.post('/auth/logout'),
+  getCurrentUser: () => apiClient.get('/auth/me'),
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    apiClient.post('/auth/change-password', data),
+  requestPasswordReset: (email: string) =>
+    apiClient.post('/auth/request-password-reset', { email }),
+  resetPassword: (token: string, newPassword: string) =>
+    apiClient.post('/auth/reset-password', { token, newPassword }),
+};
+
 // Dashboard
 export const dashboardApi = {
   getStats: (period?: string) =>
@@ -88,6 +104,8 @@ export const distributionApi = {
     apiClient.get('/distribution/overview', {
       params: batchId ? { batchId } : {},
     }),
+  getClassesWithAttendance: (batchId: string) =>
+    apiClient.get(`/distribution/batches/${batchId}/classes-with-attendance`),
 };
 
 // Kitchen

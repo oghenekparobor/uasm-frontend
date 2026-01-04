@@ -97,6 +97,9 @@ export const useAuthStore = create<AuthState>()(
       }),
       onRehydrateStorage: () => {
         return async (state) => {
+          // Defer state updates to next tick to ensure store is fully initialized
+          await new Promise(resolve => setTimeout(resolve, 0));
+          
           // After rehydration, handle token refresh if needed
           if (!state) {
             useAuthStore.setState({ isLoading: false });
@@ -129,8 +132,8 @@ export const useAuthStore = create<AuthState>()(
                 isLoading: false,
               });
               return;
+            }
           }
-        }
           
           // Always set loading to false after rehydration completes
           useAuthStore.setState({ isLoading: false });
