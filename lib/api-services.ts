@@ -22,6 +22,12 @@ export const dashboardApi = {
   getStats: (period?: string) =>
     apiClient.get('/dashboard/stats', { params: { period } }),
   getOverview: () => apiClient.get('/dashboard/overview'),
+  getOfferingsAnalytics: (period?: string) =>
+    apiClient.get('/dashboard/offerings/analytics', { params: { period } }),
+  getDistributionAnalytics: (period?: string) =>
+    apiClient.get('/dashboard/distribution/analytics', { params: { period } }),
+  getAttendanceAnalytics: (period?: string) =>
+    apiClient.get('/dashboard/attendance/analytics', { params: { period } }),
 };
 
 // Members
@@ -33,6 +39,32 @@ export const membersApi = {
   transfer: (id: string, data: any) =>
     apiClient.post(`/members/${id}/transfer`, data),
   getHistory: (id: string) => apiClient.get(`/members/${id}/history`),
+  getUpcomingBirthdays: (upcomingDays: number = 7) =>
+    apiClient.get('/members/birthdays/upcoming', { params: { upcomingDays } }),
+  uploadPhoto: (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('photo', file);
+    return apiClient.post(`/members/${id}/photo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  removePhoto: (id: string) => apiClient.post(`/members/${id}/photo/remove`),
+};
+
+// Export
+export const exportApi = {
+  exportMembers: (format: 'csv' | 'xlsx' | 'pdf', params?: any) =>
+    apiClient.get('/export/members', { params: { format, ...params }, responseType: 'blob' }),
+  exportAttendance: (format: 'csv' | 'xlsx' | 'pdf', params?: any) =>
+    apiClient.get('/export/attendance', { params: { format, ...params }, responseType: 'blob' }),
+  exportDistribution: (format: 'csv' | 'xlsx' | 'pdf', params?: any) =>
+    apiClient.get('/export/distribution', { params: { format, ...params }, responseType: 'blob' }),
+  exportActivityLogs: (format: 'csv' | 'xlsx' | 'pdf', params?: any) =>
+    apiClient.get('/export/activity-logs', { params: { format, ...params }, responseType: 'blob' }),
+  exportEmpowermentRequests: (format: 'csv' | 'xlsx' | 'pdf', params?: any) =>
+    apiClient.get('/export/empowerment-requests', { params: { format, ...params }, responseType: 'blob' }),
 };
 
 // Attendance

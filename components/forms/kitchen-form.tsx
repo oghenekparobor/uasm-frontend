@@ -79,11 +79,50 @@ export function CreateRecipeForm({
         error={errors.name?.message}
       />
 
+      <Input
+        label="Category"
+        {...register('category')}
+        error={errors.category?.message}
+        placeholder="e.g., Breakfast, Lunch, Dinner, Snack"
+      />
+
       <Textarea
         label="Description"
-        rows={4}
+        rows={3}
         {...register('description')}
         error={errors.description?.message}
+      />
+
+      <Textarea
+        label="Ingredients"
+        rows={5}
+        {...register('ingredients')}
+        error={errors.ingredients?.message}
+        placeholder="List ingredients, one per line or separated by commas"
+      />
+
+      <Textarea
+        label="Instructions"
+        rows={8}
+        {...register('instructions')}
+        error={errors.instructions?.message}
+        placeholder="Step-by-step cooking instructions"
+      />
+
+      <Textarea
+        label="Portion Sizes"
+        rows={3}
+        {...register('portionSizes')}
+        error={errors.portionSizes?.message}
+        placeholder="e.g., Serves 20, 1 cup per serving"
+      />
+
+      <Textarea
+        label="Nutritional Information"
+        rows={4}
+        {...register('nutritionalInfo')}
+        error={errors.nutritionalInfo?.message}
+        placeholder="Calories, protein, carbs, etc. (optional)"
       />
 
       <div className="flex justify-end gap-3 pt-4">

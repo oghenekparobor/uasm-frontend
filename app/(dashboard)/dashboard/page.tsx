@@ -1,13 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
+import { UpcomingBirthdays } from '@/components/dashboard/upcoming-birthdays';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const [period, setPeriod] = useState<string>('all');
   const { overview, stats, loading, error } = useDashboard(period);
@@ -141,7 +145,15 @@ export default function DashboardPage() {
       {stats?.distributionStats && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Distribution Statistics</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Distribution Statistics</CardTitle>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/distribution/analytics')}
+              >
+                View Analytics
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -213,7 +225,15 @@ export default function DashboardPage() {
       {stats?.systemStats?.offeringsStats && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Offerings & Tithe Statistics</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Offerings & Tithe Statistics</CardTitle>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/offerings/analytics')}
+              >
+                View Analytics
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -246,6 +266,10 @@ export default function DashboardPage() {
         </Card>
       )}
 
+      {/* Upcoming Birthdays and Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <UpcomingBirthdays upcomingDays={7} />
+
       {/* Recent Activity */}
       {stats?.recentActivity && stats.recentActivity.length > 0 && (
         <Card>
@@ -274,6 +298,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

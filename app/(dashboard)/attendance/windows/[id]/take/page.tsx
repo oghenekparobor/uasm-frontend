@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
 import { toast } from '@/hooks/use-toast';
+import { formatDate } from '@/lib/utils/date';
 
 export default function TakeAttendancePage() {
   const params = useParams();
@@ -202,7 +203,7 @@ export default function TakeAttendancePage() {
           </Button>
           <h1 className="text-4xl font-bold mb-2">Take Attendance</h1>
           <p className="text-gray-600">
-            Window: {new Date(window.sundayDate).toLocaleDateString()}
+            Window: {formatDate(window.sundayDate)}
           </p>
         </div>
         <Button

@@ -84,7 +84,9 @@ export default function EventDetailPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Scope</p>
-              <p className="font-semibold">{event.scope}</p>
+              <p className="font-semibold">
+                {event.scope === 'GLOBAL' ? 'Global (All Classes)' : event.scope === 'CLASS' ? 'Class Specific' : event.scope}
+              </p>
             </div>
             {event.class && (
               <div>

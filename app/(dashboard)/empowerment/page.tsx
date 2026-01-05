@@ -11,7 +11,7 @@ import {
   CreateEmpowermentForm,
   ApproveEmpowermentForm,
 } from '@/components/forms/empowerment-form';
-import { DataTable, type Column, type SortDirection } from '@/components/tables';
+import { DataTable, type Column, type SortDirection, ExportButton } from '@/components/tables';
 
 interface EmpowermentRequest {
   id: string;
@@ -110,9 +110,19 @@ export default function EmpowermentPage() {
           <h1 className="text-4xl font-bold mb-2">Empowerment</h1>
           <p className="text-gray-600">Manage empowerment requests.</p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          Create Request
-        </Button>
+        <div className="flex gap-3">
+          <ExportButton
+            data={[]}
+            columns={[]}
+            filename="empowerment-requests"
+            serverExport={{
+              type: 'empowerment-requests',
+            }}
+          />
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            Create Request
+          </Button>
+        </div>
       </div>
 
       <DataTable

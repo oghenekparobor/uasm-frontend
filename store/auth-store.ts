@@ -132,8 +132,8 @@ export const useAuthStore = create<AuthState>()(
                 isLoading: false,
               });
               return;
-            }
           }
+        }
           
           // Always set loading to false after rehydration completes
           useAuthStore.setState({ isLoading: false });

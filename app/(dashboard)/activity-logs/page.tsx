@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ExportButton } from '@/components/tables';
 
 export default function ActivityLogsPage() {
   const { data: logs, loading, error, refetch } = usePaginatedApi(
@@ -27,11 +28,21 @@ export default function ActivityLogsPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Activity Logs</h1>
-        <p className="text-gray-600">
-          View system activity and audit logs.
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Activity Logs</h1>
+          <p className="text-gray-600">
+            View system activity and audit logs.
+          </p>
+        </div>
+        <ExportButton
+          data={[]}
+          columns={[]}
+          filename="activity-logs"
+          serverExport={{
+            type: 'activity-logs',
+          }}
+        />
       </div>
 
       {!logs || logs.length === 0 ? (

@@ -67,9 +67,20 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
 };
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Skip processing for blob responses (file downloads)
+    if (response.config.responseType === 'blob') {
+      return response;
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // Skip token refresh for blob requests (file downloads)
+    if (originalRequest.responseType === 'blob') {
+      return Promise.reject(error);
+    }
 
     // Handle 401 Unauthorized
     if (error.response?.status === 401 && !originalRequest._retry) {

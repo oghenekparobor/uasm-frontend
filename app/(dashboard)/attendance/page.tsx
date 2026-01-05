@@ -4,16 +4,22 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { attendanceApi } from '@/lib/api-services';
 import { useApi } from '@/hooks/use-api';
+import { useAuthStore } from '@/store/auth-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
 import { OpenWindowForm } from '@/components/forms/attendance-form';
+import { formatDate } from '@/lib/utils/date';
+import { toast } from '@/hooks/use-toast';
+import { ExportButton } from '@/components/tables';
 
 export default function AttendancePage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [isOpenWindowModalOpen, setIsOpenWindowModalOpen] = useState(false);
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   const { data: windows, loading, error, refetch } = useApi(
     attendanceApi.getWindows
   );
@@ -40,9 +46,29 @@ export default function AttendancePage() {
           <h1 className="text-4xl font-bold mb-2">Attendance</h1>
           <p className="text-gray-600">Track and manage attendance records.</p>
         </div>
-        <Button onClick={() => setIsOpenWindowModalOpen(true)}>
-          Open Window
-        </Button>
+        <div className="flex gap-3">
+          <ExportButton
+            data={[]}
+            columns={[]}
+            filename="attendance"
+            serverExport={{
+              type: 'attendance',
+            }}
+          />
+          {isAdmin && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/attendance/analytics')}
+              >
+                View Analytics
+              </Button>
+              <Button onClick={() => setIsOpenWindowModalOpen(true)}>
+                Open Window
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Current Window */}
@@ -55,7 +81,7 @@ export default function AttendancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-semibold">
-                  {new Date(currentWindow.sundayDate).toLocaleDateString()}
+                  {formatDate(currentWindow.sundayDate)}
                 </p>
                 <p className="text-sm text-gray-500">
                   {currentWindow.isOpen ? 'Open' : 'Closed'}
@@ -106,7 +132,7 @@ export default function AttendancePage() {
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-4 py-3 text-sm">
-                        {new Date(window.sundayDate).toLocaleDateString()}
+                        {formatDate(window.sundayDate)}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <span
@@ -121,12 +147,24 @@ export default function AttendancePage() {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-500">
                         {window.opensAt
-                          ? new Date(window.opensAt).toLocaleString()
+                          ? formatDate(window.opensAt, {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit',
+                            })
                           : '—'}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-500">
                         {window.closesAt
-                          ? new Date(window.closesAt).toLocaleString()
+                          ? formatDate(window.closesAt, {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit',
+                            })
                           : '—'}
                       </td>
                       <td className="px-4 py-3 text-sm">

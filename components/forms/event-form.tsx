@@ -7,6 +7,7 @@ import { createEventSchema, type CreateEventInput } from '@/lib/validations/even
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
 import { eventsApi, classesApi } from '@/lib/api-services';
 import { toast } from '@/hooks/use-toast';
 
@@ -33,7 +34,7 @@ export function EventForm({ isOpen, onClose, onSuccess }: EventFormProps) {
   const scope = watch('scope');
 
   useEffect(() => {
-    if (isOpen && scope === 'CLASS_SPECIFIC') {
+    if (isOpen && scope === 'CLASS') {
       const fetchClasses = async () => {
         try {
           const response = await classesApi.getAll({ limit: 100 });
@@ -43,16 +44,15 @@ export function EventForm({ isOpen, onClose, onSuccess }: EventFormProps) {
         }
       };
       fetchClasses();
-    } else {
-      reset();
     }
-  }, [isOpen, scope, reset]);
+  }, [isOpen, scope]);
 
   const onSubmit = async (data: CreateEventInput) => {
     try {
       setLoading(true);
       await eventsApi.create(data);
       toast.success('Event created successfully');
+      reset();
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -77,6 +77,22 @@ export function EventForm({ isOpen, onClose, onSuccess }: EventFormProps) {
         error={errors.description?.message}
       />
 
+      <div>
+        <label className="block text-sm font-medium mb-2">
+          Event Date <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="datetime-local"
+          {...register('eventDate')}
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black transition-colors ${
+            errors.eventDate ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
+          }`}
+        />
+        {errors.eventDate && (
+          <p className="text-red-500 text-sm mt-1">{errors.eventDate.message}</p>
+        )}
+      </div>
+
       <Select
         label="Event Scope"
         {...register('scope')}
@@ -84,11 +100,11 @@ export function EventForm({ isOpen, onClose, onSuccess }: EventFormProps) {
         options={[
           { value: '', label: 'Select scope' },
           { value: 'GLOBAL', label: 'Global (All Classes)' },
-          { value: 'CLASS_SPECIFIC', label: 'Class Specific' },
+          { value: 'CLASS', label: 'Class Specific' },
         ]}
       />
 
-      {scope === 'CLASS_SPECIFIC' && (
+      {scope === 'CLASS' && (
         <Select
           label="Class"
           {...register('classId')}

@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
+import { formatDate } from '@/lib/utils/date';
+import { toast } from '@/hooks/use-toast';
 
 export default function AttendanceWindowDetailPage() {
   const params = useParams();
@@ -19,6 +21,7 @@ export default function AttendanceWindowDetailPage() {
   const [allClasses, setAllClasses] = useState<any[]>([]);
   const [attendanceOverview, setAttendanceOverview] = useState<any[]>([]);
   const [loadingOverview, setLoadingOverview] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   
@@ -39,9 +42,9 @@ export default function AttendanceWindowDetailPage() {
         } else {
           // Non-admins see only their assigned classes
           const userClasses = classes.filter((cls: any) =>
-            cls.classLeaders?.some((leader: any) => leader.user.id === user.id)
-          );
-          setMyClasses(userClasses);
+          cls.classLeaders?.some((leader: any) => leader.user.id === user.id)
+        );
+        setMyClasses(userClasses);
         }
       }).catch((error) => {
         console.error('Failed to fetch classes:', error);
@@ -104,7 +107,7 @@ export default function AttendanceWindowDetailPage() {
             ← Back
           </Button>
           <h1 className="text-4xl font-bold mb-2">
-            Attendance Window - {new Date(window.sundayDate).toLocaleDateString()}
+            Attendance Window - {formatDate(window.sundayDate)}
           </h1>
           <p className="text-gray-600">Attendance Window Details</p>
         </div>
@@ -133,7 +136,7 @@ export default function AttendanceWindowDetailPage() {
             <div>
               <p className="text-sm text-gray-500">Sunday Date</p>
               <p className="font-semibold">
-                {new Date(window.sundayDate).toLocaleDateString()}
+                {formatDate(window.sundayDate)}
               </p>
             </div>
             <div>
@@ -153,13 +156,25 @@ export default function AttendanceWindowDetailPage() {
             <div>
               <p className="text-sm text-gray-500">Opens At</p>
               <p className="font-semibold">
-                {new Date(window.opensAt).toLocaleString()}
+                {formatDate(window.opensAt, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Closes At</p>
               <p className="font-semibold">
-                {new Date(window.closesAt).toLocaleString()}
+                {formatDate(window.closesAt, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
               </p>
             </div>
           </CardContent>

@@ -67,7 +67,7 @@ export function AttendanceHeatmap({ records, className }: AttendanceHeatmapProps
     } else if (status === 'absent') {
       return 'bg-red-500';
     } else {
-      return 'bg-gray-100';
+    return 'bg-gray-100';
     }
   };
 
@@ -90,29 +90,29 @@ export function AttendanceHeatmap({ records, className }: AttendanceHeatmapProps
     <div className={className}>
       <div className="flex flex-wrap gap-2">
         {windowData.map((window) => {
-          return (
-            <div
+              return (
+                <div
               key={window.windowId}
               className={`w-4 h-4 rounded ${getColor(window.status)} hover:ring-2 hover:ring-gray-400 cursor-pointer transition-all`}
               title={getTooltip(window)}
-            />
-          );
-        })}
-      </div>
+                />
+              );
+            })}
+          </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
-        <div className="flex items-center gap-2">
+          {/* Legend */}
+          <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
+            <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-green-500" />
-          <span>Present</span>
-        </div>
-        <div className="flex items-center gap-2">
+              <span>Present</span>
+            </div>
+            <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-red-500" />
-          <span>Absent</span>
-        </div>
-        <div className="flex items-center gap-2">
+              <span>Absent</span>
+            </div>
+            <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gray-100" />
-          <span>No Record</span>
+              <span>No Record</span>
         </div>
       </div>
     </div>

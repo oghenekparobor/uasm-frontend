@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { eventsApi } from '@/lib/api-services';
 import { usePaginatedApi } from '@/hooks/use-api';
+import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
@@ -22,6 +23,8 @@ interface Event {
 
 export default function EventsPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [sortKey, setSortKey] = useState<string>();
@@ -87,12 +90,16 @@ export default function EventsPage() {
       header: 'Event Date',
       sortable: true,
       render: (event) =>
-        event.eventDate ? new Date(event.eventDate).toLocaleDateString() : '—',
+        event.eventDate ? new Date(event.eventDate).toLocaleString() : '—',
     },
     {
       key: 'scope',
       header: 'Scope',
-      render: (event) => event.scope || '—',
+      render: (event) => {
+        if (event.scope === 'GLOBAL') return 'Global (All Classes)';
+        if (event.scope === 'CLASS') return 'Class Specific';
+        return event.scope || '—';
+      },
     },
   ];
 
@@ -105,11 +112,13 @@ export default function EventsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Events</h1>
-          <p className="text-gray-600">Manage events and activities.</p>
+          <p className="text-gray-600">View upcoming events and activities.</p>
         </div>
+        {isAdmin && (
         <Button onClick={() => setIsCreateModalOpen(true)}>
           Create Event
         </Button>
+        )}
       </div>
 
       <DataTable
@@ -134,7 +143,7 @@ export default function EventsPage() {
             >
               View Details
             </button>
-            {event.status === 'PENDING' && (
+            {isAdmin && event.status === 'PENDING' && (
               <button
                 onClick={() => handleApprove(event.id)}
                 className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"

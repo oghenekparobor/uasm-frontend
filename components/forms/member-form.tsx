@@ -113,6 +113,36 @@ export function MemberForm({
         error={errors.birthday?.message}
       />
 
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          label="Phone Number"
+          type="tel"
+          {...register('phone')}
+          error={errors.phone?.message}
+        />
+        <Input
+          label="Email"
+          type="email"
+          {...register('email')}
+          error={errors.email?.message}
+        />
+      </div>
+
+      <Textarea
+        label="Address"
+        rows={3}
+        {...register('address')}
+        error={errors.address?.message}
+      />
+
+      <Textarea
+        label="Emergency Contact"
+        rows={2}
+        {...register('emergencyContact')}
+        error={errors.emergencyContact?.message}
+        placeholder="Name, relationship, and phone number"
+      />
+
       <Select
         label="Class"
         {...register('currentClassId')}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { kitchenApi } from '@/lib/api-services';
 import { usePaginatedApi } from '@/hooks/use-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import {
 } from '@/components/forms/kitchen-form';
 
 export default function KitchenPage() {
+  const router = useRouter();
   const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
   const [isProductionModalOpen, setIsProductionModalOpen] = useState(false);
   const {
@@ -79,13 +81,27 @@ export default function KitchenPage() {
                   key={recipe.id}
                   className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
                 >
-                  <div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
                     <p className="font-medium">{recipe.name}</p>
-                    <p className="text-sm text-gray-500">
+                      {recipe.category && (
+                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                          {recipe.category}
+                        </span>
+                      )}
+                    </div>
+                    {recipe.description && (
+                      <p className="text-sm text-gray-500 mt-1">
                       {recipe.description}
                     </p>
+                    )}
                   </div>
-                  <Button variant="outline">View</Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push(`/kitchen/recipes/${recipe.id}`)}
+                  >
+                    View
+                  </Button>
                 </div>
               ))}
             </div>

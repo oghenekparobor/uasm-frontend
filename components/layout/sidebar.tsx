@@ -117,9 +117,23 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   if (!user) return null;
 
+  // Get all roles the user has (primary role + additional roles)
+  const userRoles = [
+    user.role,
+    ...(user.roles || []).map((r: any) => typeof r === 'string' ? r : r.role || r.name),
+  ].filter(Boolean);
+
+  // If user has platoonIds (class assignments), they should be treated as a leader
+  // even if their primary role is 'worker'
+  const hasClassAssignments = user.platoonIds && user.platoonIds.length > 0;
+  const effectiveRoles = hasClassAssignments 
+    ? [...userRoles, 'platoon_leader', 'assistant_platoon_leader', 'children_teacher']
+    : userRoles;
+
   const visibleItems = navigationItems.filter((item) => {
     if (!item.roles) return true;
-    return item.roles.includes(user.role);
+    // Check if user has any of the required roles (including effective roles from class assignments)
+    return item.roles.some((requiredRole) => effectiveRoles.includes(requiredRole));
   });
 
   return (

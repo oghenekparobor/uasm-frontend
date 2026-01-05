@@ -17,6 +17,7 @@ interface Member {
   id: string;
   firstName: string;
   lastName: string;
+  photoUrl?: string;
   birthday?: string;
   currentClass?: {
     id: string;
@@ -107,7 +108,30 @@ export default function MembersPage() {
     },
   ];
 
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
   const columns: Column<Member>[] = [
+    {
+      key: 'photo',
+      header: '',
+      render: (member) => (
+        <div className="flex items-center">
+          {member.photoUrl ? (
+            <img
+              src={member.photoUrl}
+              alt={`${member.firstName} ${member.lastName}`}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-600">
+              {getInitials(member.firstName, member.lastName)}
+            </div>
+          )}
+        </div>
+      ),
+    },
     {
       key: 'firstName',
       header: 'First Name',
@@ -220,6 +244,14 @@ export default function MembersPage() {
             selectedIds={selectedIds}
             keyExtractor={(m) => m.id}
             filename="members"
+            serverExport={{
+              type: 'members',
+              params: {
+                ...transformedFilters,
+                startDate: filters.birthday?.start,
+                endDate: filters.birthday?.end,
+              },
+            }}
           />
         }
         loading={loading}

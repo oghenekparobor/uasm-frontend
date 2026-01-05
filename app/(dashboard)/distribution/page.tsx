@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
 import { ConfirmReceiptForm } from '@/components/forms/distribution-form';
+import { ExportButton } from '@/components/tables';
 
 export default function DistributionPage() {
   const router = useRouter();
@@ -43,9 +44,19 @@ export default function DistributionPage() {
             Manage food and water distribution.
           </p>
         </div>
-        <Button onClick={() => setIsConfirmReceiptModalOpen(true)}>
-          Confirm Receipt
-        </Button>
+        <div className="flex gap-3">
+          <ExportButton
+            data={[]}
+            columns={[]}
+            filename="distribution"
+            serverExport={{
+              type: 'distribution',
+            }}
+          />
+          <Button onClick={() => setIsConfirmReceiptModalOpen(true)}>
+            Confirm Receipt
+          </Button>
+        </div>
       </div>
 
       {/* Current Batch */}
