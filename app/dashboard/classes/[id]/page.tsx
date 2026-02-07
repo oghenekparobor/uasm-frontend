@@ -437,6 +437,7 @@ export default function ClassDetailPage() {
       >
         <div className="space-y-4">
           <Select
+            id="assign-leader-user"
             label="Select User"
             value={selectedUserId}
             onChange={(e) => setSelectedUserId(e.target.value)}
@@ -450,6 +451,7 @@ export default function ClassDetailPage() {
           />
           
           <Select
+            id="assign-leader-role"
             label="Select Role"
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}

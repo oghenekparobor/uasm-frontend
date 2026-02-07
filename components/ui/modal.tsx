@@ -24,11 +24,20 @@ export function Modal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.inset = '0';
+      document.body.style.width = '100%';
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.inset = '';
+      document.body.style.width = '';
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.inset = '';
+      document.body.style.width = '';
     };
   }, [isOpen]);
 
@@ -43,27 +52,31 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4 overflow-y-auto overscroll-contain"
+      style={{ paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}
       onClick={onClose}
     >
       <div
         className={cn(
-          'w-full rounded-lg bg-white shadow-xl my-auto',
+          'w-full bg-white shadow-xl flex flex-col',
+          'max-h-[100dvh] sm:max-h-[calc(100vh-2rem)]',
+          'rounded-t-2xl sm:rounded-lg sm:my-auto',
           sizeClasses[size]
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
-          <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
+        {/* Header: sticky, touch-friendly close (min 44x44px) */}
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 shrink-0 bg-white rounded-t-2xl sm:rounded-t-lg">
+          <h2 className="text-base sm:text-xl font-semibold min-h-[1.5rem] leading-tight pr-2">{title}</h2>
           {showCloseButton && (
             <button
+              type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-black transition-colors"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-gray-500 hover:text-black active:text-black transition-colors touch-manipulation"
               aria-label="Close"
             >
               <svg
-                className="h-5 w-5 sm:h-6 sm:w-6"
+                className="h-6 w-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -79,8 +92,10 @@ export function Modal({
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-4 sm:p-6 max-h-[calc(100vh-200px)] overflow-y-auto">{children}</div>
+        {/* Content: scrollable, safe area */}
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto overscroll-contain min-h-0">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -95,7 +110,7 @@ export function ModalFooter({ children, className }: ModalFooterProps) {
   return (
     <div
       className={cn(
-        'flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4',
+        'flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 border-t border-gray-200 px-4 sm:px-6 py-4 sm:py-4 shrink-0',
         className
       )}
     >

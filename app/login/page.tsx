@@ -35,19 +35,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-4">
+    <div className="flex min-h-[100dvh] min-h-screen items-center justify-center bg-white p-4 sm:p-6">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
+        <div className="mb-6 sm:mb-8 text-center">
           <div className="mb-4 flex justify-center">
             <div className="flex h-12 w-12 items-center justify-center rounded bg-black text-white text-2xl font-bold">
               U
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-2">UAMS</h1>
-          <p className="text-gray-600">Urban Alternative Management System</p>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">UAMS</h1>
+          <p className="text-sm sm:text-base text-gray-600">Urban Alternative Management System</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2">
               Email
@@ -56,11 +56,12 @@ export default function LoginPage() {
               id="email"
               type="email"
               required
+              autoComplete="email"
               value={credentials.email}
               onChange={(e) =>
                 setCredentials({ ...credentials, email: e.target.value })
               }
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-black focus:outline-none"
+              className="w-full min-h-[44px] rounded-lg border border-gray-300 px-4 py-2.5 text-base focus:border-black focus:outline-none focus:ring-2 focus:ring-black touch-manipulation"
               placeholder="you@example.com"
             />
           </div>
@@ -73,11 +74,12 @@ export default function LoginPage() {
               id="password"
               type="password"
               required
+              autoComplete="current-password"
               value={credentials.password}
               onChange={(e) =>
                 setCredentials({ ...credentials, password: e.target.value })
               }
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-black focus:outline-none"
+              className="w-full min-h-[44px] rounded-lg border border-gray-300 px-4 py-2.5 text-base focus:border-black focus:outline-none focus:ring-2 focus:ring-black touch-manipulation"
               placeholder="••••••••"
             />
           </div>
@@ -91,7 +93,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-lg bg-black px-4 py-2 text-white font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full min-h-[48px] rounded-lg bg-black px-4 py-3 text-base text-white font-medium hover:bg-gray-800 active:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
           </button>

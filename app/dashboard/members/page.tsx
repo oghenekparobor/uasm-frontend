@@ -249,7 +249,7 @@ export default function MembersPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search members..."
-                className="flex-1 min-w-0 px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-base sm:text-sm"
+                className="flex-1 min-w-0 min-h-[44px] px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-base sm:text-sm touch-manipulation"
               />
               <Button type="submit" className="w-full sm:w-auto shrink-0">Search</Button>
             </form>
@@ -289,8 +289,9 @@ export default function MembersPage() {
         rowActions={(member) => (
           <>
             <button
+              type="button"
               onClick={() => router.push(`/dashboard/members/${member.id}`)}
-              className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center min-h-[44px] text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
             >
               View Details
             </button>

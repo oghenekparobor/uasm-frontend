@@ -26,8 +26,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
         <div className="flex flex-1 flex-col min-w-0 lg:ml-64">
           <Header onMenuClick={toggleSidebar} />
-          <main className="flex-1 overflow-y-auto overflow-x-hidden pt-16 min-w-0">
-            <div className="p-4 sm:p-6 min-w-0">{children}</div>
+          <main className="flex-1 overflow-y-auto overflow-x-hidden pt-16 min-w-0 overscroll-contain">
+            <div className="p-4 sm:p-6 min-w-0 max-w-full">{children}</div>
           </main>
         </div>
       </div>

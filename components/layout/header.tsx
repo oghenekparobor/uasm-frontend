@@ -66,9 +66,13 @@ export function Header({ onMenuClick }: HeaderProps) {
           {/* Breadcrumbs or page title can go here */}
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          {/* Notifications */}
-          <button className="relative p-2 text-gray-600 hover:text-black transition-colors">
+        <div className="flex items-center gap-1 sm:gap-4">
+          {/* Notifications - min 44x44px touch target */}
+          <button
+            type="button"
+            className="relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-gray-600 hover:text-black active:text-black transition-colors touch-manipulation"
+            aria-label="Notifications"
+          >
             <svg
               className="h-5 w-5"
               fill="none"
@@ -82,14 +86,15 @@ export function Header({ onMenuClick }: HeaderProps) {
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               />
             </svg>
-            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" aria-hidden />
           </button>
 
-          {/* User Menu */}
+          {/* User Menu - min 44px touch target */}
           <div className="relative" ref={userMenuRef}>
             <button
+              type="button"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-2 min-h-[44px] px-2 sm:px-3 py-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-medium">
                 {user?.firstName?.[0] || user?.email[0].toUpperCase()}
@@ -114,21 +119,22 @@ export function Header({ onMenuClick }: HeaderProps) {
 
             {/* Dropdown Menu */}
             {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg z-50">
-                <div className="p-2">
+              <div className="absolute right-0 mt-2 w-48 min-w-[180px] rounded-lg border border-gray-200 bg-white shadow-lg z-50 overflow-hidden">
+                <div className="p-1">
                   <Link
                     href="/profile"
-                    className="block px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
+                    className="flex items-center min-h-[44px] px-3 py-2 text-sm rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
                     onClick={() => setUserMenuOpen(false)}
                   >
                     Profile
                   </Link>
                   <button
+                    type="button"
                     onClick={() => {
                       setUserMenuOpen(false);
                       handleLogout();
                     }}
-                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
+                    className="w-full flex items-center min-h-[44px] text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
                   >
                     Logout
                   </button>

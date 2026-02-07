@@ -126,15 +126,15 @@ export function DataTable<T>({
         </div>
       )}
 
-      {/* Table - horizontal scroll on mobile */}
-      <div className="w-full min-w-0">
+      {/* Table - horizontal scroll on mobile, sticky header */}
+      <div className="w-full min-w-0 -mx-2 sm:mx-0">
         <div className="overflow-x-auto overflow-y-visible border border-gray-200 rounded-lg overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="inline-block min-w-full align-middle">
             <table className="w-full min-w-[640px] border-collapse">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-[1]">
             <tr>
               {selectable && (
-                <th className="w-12 px-4 py-3 text-left">
+                <th className="w-12 px-3 sm:px-4 py-3 text-left bg-gray-50">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -142,7 +142,8 @@ export function DataTable<T>({
                       if (input) input.indeterminate = someSelected;
                     }}
                     onChange={handleSelectAll}
-                    className="rounded border-gray-300 text-black focus:ring-black"
+                    className="rounded border-gray-300 text-black focus:ring-black w-4 h-4 min-w-[20px] min-h-[20px] touch-manipulation"
+                    aria-label="Select all"
                   />
                 </th>
               )}
@@ -153,13 +154,13 @@ export function DataTable<T>({
                   currentSort={sortKey}
                   currentDirection={sortDirection}
                   onSort={onSort}
-                  className={cn('px-4 py-3 text-left text-sm font-medium text-gray-700', column.headerClassName)}
+                  className={cn('px-3 sm:px-4 py-3 text-left text-sm font-medium text-gray-700 bg-gray-50 whitespace-nowrap', column.headerClassName)}
                 >
                   {column.header}
                 </SortableHeader>
               ))}
               {rowActions && (
-                <th className="w-12 px-4 py-3 text-left text-sm font-medium text-gray-700">
+                <th className="w-14 sm:w-12 px-2 sm:px-4 py-3 text-left text-sm font-medium text-gray-700 bg-gray-50">
                   Actions
                 </th>
               )}
@@ -187,21 +188,22 @@ export function DataTable<T>({
                 >
                   {selectable && (
                     <td
-                      className="px-4 py-3"
+                      className="px-3 sm:px-4 py-3"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleSelectRow(id)}
-                        className="rounded border-gray-300 text-black focus:ring-black"
+                        className="rounded border-gray-300 text-black focus:ring-black w-4 h-4 min-w-[20px] min-h-[20px] touch-manipulation"
+                        aria-label="Select row"
                       />
                     </td>
                   )}
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className={cn('px-4 py-3 text-sm text-gray-900', column.className)}
+                      className={cn('px-3 sm:px-4 py-3 text-sm text-gray-900', column.className)}
                     >
                       {column.render
                         ? column.render(item)
@@ -210,7 +212,7 @@ export function DataTable<T>({
                   ))}
                   {rowActions && (
                     <td
-                      className="px-4 py-3 relative"
+                      className="px-2 sm:px-4 py-3 relative"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="relative">
@@ -220,7 +222,8 @@ export function DataTable<T>({
                           onClick={() =>
                             setShowRowActions(isActionsOpen ? null : id)
                           }
-                          className="h-8 w-8 p-0"
+                          className="min-w-[44px] min-h-[44px] w-10 h-10 sm:w-8 sm:h-8 p-0 flex items-center justify-center touch-manipulation"
+                          aria-label="Row actions"
                         >
                           <svg
                             className="h-4 w-4"

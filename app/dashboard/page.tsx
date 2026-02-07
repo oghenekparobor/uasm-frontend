@@ -43,7 +43,7 @@ export default function DashboardPage() {
         <select
           value={period}
           onChange={(e) => setPeriod(e.target.value)}
-          className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+          className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 text-base sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black touch-manipulation"
         >
           <option value="all">All Time</option>
           <option value="today">Today</option>

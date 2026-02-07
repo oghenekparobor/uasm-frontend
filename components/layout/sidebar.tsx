@@ -189,10 +189,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               </div>
               <span className="text-xl font-bold">UAMS</span>
             </Link>
-            {/* Close button for mobile */}
+            {/* Close button for mobile - min 44x44px touch target */}
             <button
+              type="button"
               onClick={onClose}
-              className="lg:hidden p-2 text-gray-600 hover:text-black transition-colors"
+              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 text-gray-600 hover:text-black active:text-black transition-colors touch-manipulation"
               aria-label="Close menu"
             >
               <svg
@@ -221,10 +222,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <Link
                       href={item.href}
                       className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                        'flex items-center gap-3 rounded-lg px-3 min-h-[44px] py-2 text-sm font-medium transition-colors touch-manipulation',
                         isActive
                           ? 'bg-black text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
                       )}
                     >
                       {item.icon}

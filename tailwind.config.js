@@ -7,6 +7,13 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: '320px',
+      },
+      minHeight: {
+        touch: '44px',
+        'touch-md': '48px',
+      },
       colors: {
         background: 'rgb(var(--background))',
         foreground: 'rgb(var(--foreground))',

@@ -20,7 +20,7 @@ interface CardHeaderProps {
 
 export function CardHeader({ children, className }: CardHeaderProps) {
   return (
-    <div className={cn('p-6 border-b border-gray-200', className)}>
+    <div className={cn('p-4 sm:p-6 border-b border-gray-200', className)}>
       {children}
     </div>
   );
@@ -32,7 +32,7 @@ interface CardContentProps {
 }
 
 export function CardContent({ children, className }: CardContentProps) {
-  return <div className={cn('p-6', className)}>{children}</div>;
+  return <div className={cn('p-4 sm:p-6', className)}>{children}</div>;
 }
 
 interface CardTitleProps {
@@ -42,7 +42,7 @@ interface CardTitleProps {
 
 export function CardTitle({ children, className }: CardTitleProps) {
   return (
-    <h3 className={cn('text-lg font-semibold', className)}>{children}</h3>
+    <h3 className={cn('text-base sm:text-lg font-semibold', className)}>{children}</h3>
   );
 }
 
