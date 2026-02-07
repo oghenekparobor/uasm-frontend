@@ -41,6 +41,8 @@ export const membersApi = {
   getHistory: (id: string) => apiClient.get(`/members/${id}/history`),
   getUpcomingBirthdays: (upcomingDays: number = 7) =>
     apiClient.get('/members/birthdays/upcoming', { params: { upcomingDays } }),
+  getPastBirthdays: (pastDays: number = 7) =>
+    apiClient.get('/members/birthdays/past', { params: { pastDays } }),
   uploadPhoto: (id: string, file: File) => {
     const formData = new FormData();
     formData.append('photo', file);
