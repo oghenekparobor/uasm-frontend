@@ -55,6 +55,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Minimal package.json so "npm start" runs the standalone server (no next CLI in image)
+RUN echo '{"name":"uams-frontend","version":"1.0.0","private":true,"scripts":{"start":"node server.js"}}' > package.json && chown nextjs:nodejs package.json
+
 USER nextjs
 
 EXPOSE 3001
@@ -62,5 +65,5 @@ EXPOSE 3001
 ENV PORT=3001
 ENV HOSTNAME="0.0.0.0"
 
-# Start Next.js server
+# Start Next.js standalone server
 CMD ["node", "server.js"]
