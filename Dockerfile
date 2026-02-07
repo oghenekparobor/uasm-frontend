@@ -22,6 +22,9 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
+# Ensure public exists (Next.js optional; COPY in runner needs it)
+RUN mkdir -p /app/public
+
 # Build arguments for environment variables (needed at build time for Next.js)
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_APP_NAME
