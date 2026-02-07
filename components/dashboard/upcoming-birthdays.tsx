@@ -86,7 +86,7 @@ export function UpcomingBirthdays({ upcomingDays = 7 }: UpcomingBirthdaysProps) 
               <div
                 key={member.id}
                 className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => router.push(`/members/${member.id}`)}
+                onClick={() => router.push(`/dashboard/members/${member.id}`)}
               >
                 <div className="flex items-center gap-3 flex-1">
                   {member.photoUrl ? (

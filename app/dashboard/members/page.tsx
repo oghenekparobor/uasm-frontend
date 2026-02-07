@@ -285,11 +285,11 @@ export default function MembersPage() {
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
-        onRowClick={(member) => router.push(`/members/${member.id}`)}
+        onRowClick={(member) => router.push(`/dashboard/members/${member.id}`)}
         rowActions={(member) => (
           <>
             <button
-              onClick={() => router.push(`/members/${member.id}`)}
+              onClick={() => router.push(`/dashboard/members/${member.id}`)}
               className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
             >
               View Details

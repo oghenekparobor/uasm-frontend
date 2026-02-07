@@ -61,7 +61,7 @@ export default function AttendancePage() {
                 variant="outline"
                 size="sm"
                 className="w-full sm:w-auto shrink-0"
-                onClick={() => router.push('/attendance/analytics')}
+                onClick={() => router.push('/dashboard/attendance/analytics')}
               >
                 View Analytics
               </Button>
@@ -185,7 +185,7 @@ export default function AttendancePage() {
                             size="sm"
                             className="shrink-0"
                             onClick={() =>
-                              router.push(`/attendance/windows/${window.id}`)
+                              router.push(`/dashboard/attendance/windows/${window.id}`)
                             }
                           >
                             View

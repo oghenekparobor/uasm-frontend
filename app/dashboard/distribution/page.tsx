@@ -151,7 +151,7 @@ export default function DistributionPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => router.push(`/distribution/batches/${batch.id}`)}
+                          onClick={() => router.push(`/dashboard/distribution/batches/${batch.id}`)}
                         >
                           View
                         </Button>
@@ -181,7 +181,7 @@ export default function DistributionPage() {
             setIsConfirmReceiptModalOpen(false);
             // Redirect to batch detail page to allocate to classes
             if (batchId) {
-              router.push(`/distribution/batches/${batchId}`);
+              router.push(`/dashboard/distribution/batches/${batchId}`);
             }
           }}
         />

@@ -39,7 +39,7 @@ export default function AttendanceAnalyticsPage() {
 
   useEffect(() => {
     if (user && !isAdmin) {
-      router.push('/attendance');
+      router.push('/dashboard/attendance');
     }
   }, [user, isAdmin, router]);
 
@@ -112,7 +112,7 @@ export default function AttendanceAnalyticsPage() {
         <div>
           <Button
             variant="outline"
-            onClick={() => router.push('/attendance')}
+            onClick={() => router.push('/dashboard/attendance')}
             className="mb-4"
           >
             ← Back to Attendance
@@ -459,7 +459,7 @@ export default function AttendanceAnalyticsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          router.push(`/attendance/windows/${item.windowId}`)
+                          router.push(`/dashboard/attendance/windows/${item.windowId}`)
                         }
                       >
                         View

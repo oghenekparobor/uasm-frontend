@@ -128,11 +128,11 @@ export default function RequestsPage() {
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
-        onRowClick={(request) => router.push(`/requests/${request.id}`)}
+        onRowClick={(request) => router.push(`/dashboard/requests/${request.id}`)}
         rowActions={(request) => (
           <>
             <button
-              onClick={() => router.push(`/requests/${request.id}`)}
+              onClick={() => router.push(`/dashboard/requests/${request.id}`)}
               className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
             >
               View Details

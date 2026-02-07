@@ -132,7 +132,7 @@ export default function ClassDetailPage() {
       setIsDeleting(true);
       await classesApi.delete(id);
       toast.success('Class and all its members removed successfully');
-      router.push('/classes');
+      router.push('/dashboard/classes');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to remove class');
     } finally {
@@ -285,7 +285,7 @@ export default function ClassDetailPage() {
                     <div
                       key={member.id}
                       className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                      onClick={() => router.push(`/members/${member.id}`)}
+                      onClick={() => router.push(`/dashboard/members/${member.id}`)}
                     >
                       <p className="font-semibold">
                         {member.firstName} {member.lastName}

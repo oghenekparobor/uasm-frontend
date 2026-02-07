@@ -134,11 +134,11 @@ export default function EventsPage() {
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
-        onRowClick={(event) => router.push(`/events/${event.id}`)}
+        onRowClick={(event) => router.push(`/dashboard/events/${event.id}`)}
         rowActions={(event) => (
           <>
             <button
-              onClick={() => router.push(`/events/${event.id}`)}
+              onClick={() => router.push(`/dashboard/events/${event.id}`)}
               className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
             >
               View Details

@@ -213,11 +213,11 @@ export default function ClassesPage() {
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
-        onRowClick={(cls) => router.push(`/classes/${cls.id}`)}
+        onRowClick={(cls) => router.push(`/dashboard/classes/${cls.id}`)}
         rowActions={(cls) => (
           <>
             <button
-              onClick={() => router.push(`/classes/${cls.id}`)}
+              onClick={() => router.push(`/dashboard/classes/${cls.id}`)}
               className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
             >
               View Details

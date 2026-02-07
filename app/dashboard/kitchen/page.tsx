@@ -98,7 +98,7 @@ export default function KitchenPage() {
                   </div>
                   <Button
                     variant="outline"
-                    onClick={() => router.push(`/kitchen/recipes/${recipe.id}`)}
+                    onClick={() => router.push(`/dashboard/kitchen/recipes/${recipe.id}`)}
                   >
                     View
                   </Button>

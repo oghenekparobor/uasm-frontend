@@ -456,7 +456,7 @@ export default function MemberDetailPage() {
                 <div
                   key={request.id}
                   className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/empowerment/${request.id}`)}
+                  onClick={() => router.push(`/dashboard/empowerment/${request.id}`)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">

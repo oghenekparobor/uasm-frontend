@@ -124,7 +124,7 @@ export default function AttendanceWindowDetailPage() {
         <div className="flex gap-3">
           {window.isOpen && myClasses.length > 0 && (
             <Button
-              onClick={() => router.push(`/attendance/windows/${id}/take`)}
+              onClick={() => router.push(`/dashboard/attendance/windows/${id}/take`)}
               size="lg"
             >
               Take Attendance

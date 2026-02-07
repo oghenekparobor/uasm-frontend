@@ -159,7 +159,7 @@ export default function TakeAttendancePage() {
             <p className="text-gray-600 mb-4">
               This attendance window is not currently open.
             </p>
-            <Button onClick={() => router.push('/attendance')}>
+            <Button onClick={() => router.push('/dashboard/attendance')}>
               Back to Attendance
             </Button>
           </CardContent>
@@ -177,7 +177,7 @@ export default function TakeAttendancePage() {
             <p className="text-gray-600 mb-4">
               You are not assigned as a leader or teacher to any classes.
             </p>
-            <Button onClick={() => router.push('/attendance')}>
+            <Button onClick={() => router.push('/dashboard/attendance')}>
               Back to Attendance
             </Button>
           </CardContent>
@@ -196,7 +196,7 @@ export default function TakeAttendancePage() {
         <div>
           <Button
             variant="outline"
-            onClick={() => router.push(`/attendance/windows/${windowId}`)}
+            onClick={() => router.push(`/dashboard/attendance/windows/${windowId}`)}
             className="mb-4"
           >
             ← Back

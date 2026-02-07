@@ -197,11 +197,11 @@ export default function UsersPage() {
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
-        onRowClick={(user) => router.push(`/users/${user.id}`)}
+        onRowClick={(user) => router.push(`/dashboard/users/${user.id}`)}
         rowActions={(user) => (
           <>
             <button
-              onClick={() => router.push(`/users/${user.id}`)}
+              onClick={() => router.push(`/dashboard/users/${user.id}`)}
               className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
             >
               View Details

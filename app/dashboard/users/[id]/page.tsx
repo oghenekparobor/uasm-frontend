@@ -91,7 +91,7 @@ export default function UserDetailPage() {
       setIsDeleting(true);
       await usersApi.delete(id);
       toast.success('User deleted successfully');
-      router.push('/users');
+      router.push('/dashboard/users');
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || 'Failed to delete user'

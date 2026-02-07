@@ -27,7 +27,7 @@ const navigationItems: NavItem[] = [
   },
   {
     label: 'Members',
-    href: '/members',
+    href: '/dashboard/members',
     roles: [
       ROLES.SUPER_ADMIN,
       ROLES.ADMIN,
@@ -38,7 +38,7 @@ const navigationItems: NavItem[] = [
   },
   {
     label: 'Attendance',
-    href: '/attendance',
+    href: '/dashboard/attendance',
     roles: [
       ROLES.SUPER_ADMIN,
       ROLES.ADMIN,
@@ -50,7 +50,7 @@ const navigationItems: NavItem[] = [
   },
   {
     label: 'Classes',
-    href: '/classes',
+    href: '/dashboard/classes',
     roles: [
       ROLES.SUPER_ADMIN,
       ROLES.ADMIN,
@@ -61,22 +61,22 @@ const navigationItems: NavItem[] = [
   },
   {
     label: 'Users',
-    href: '/users',
+    href: '/dashboard/users',
     roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
   },
   {
     label: 'Distribution',
-    href: '/distribution',
+    href: '/dashboard/distribution',
     roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DISTRIBUTION],
   },
   {
     label: 'Kitchen',
-    href: '/kitchen',
+    href: '/dashboard/kitchen',
     roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.KITCHEN],
   },
   {
     label: 'Empowerment',
-    href: '/empowerment',
+    href: '/dashboard/empowerment',
     roles: [
       ROLES.SUPER_ADMIN,
       ROLES.ADMIN,
@@ -85,7 +85,7 @@ const navigationItems: NavItem[] = [
   },
   {
     label: 'Events',
-    href: '/events',
+    href: '/dashboard/events',
     roles: [
       ROLES.SUPER_ADMIN,
       ROLES.ADMIN,
@@ -94,12 +94,12 @@ const navigationItems: NavItem[] = [
   },
   {
     label: 'Requests',
-    href: '/requests',
+    href: '/dashboard/requests',
     roles: Object.values(ROLES),
   },
   {
     label: 'Activity Logs',
-    href: '/activity-logs',
+    href: '/dashboard/activity-logs',
     roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
   },
 ];

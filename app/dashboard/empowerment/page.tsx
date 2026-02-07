@@ -138,11 +138,11 @@ export default function EmpowermentPage() {
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
-        onRowClick={(request) => router.push(`/empowerment/${request.id}`)}
+        onRowClick={(request) => router.push(`/dashboard/empowerment/${request.id}`)}
         rowActions={(request) => (
           <>
             <button
-              onClick={() => router.push(`/empowerment/${request.id}`)}
+              onClick={() => router.push(`/dashboard/empowerment/${request.id}`)}
               className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
             >
               View Details
