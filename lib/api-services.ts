@@ -51,6 +51,15 @@ export const membersApi = {
     });
   },
   removePhoto: (id: string) => apiClient.post(`/members/${id}/photo/remove`),
+  uploadCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post<{ created: number; errors: { row: number; message: string }[] }>(
+      '/members/upload-csv',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
+  },
 };
 
 // Export
@@ -101,6 +110,7 @@ export const classesApi = {
   getOne: (id: string) => apiClient.get(`/classes/${id}`),
   create: (data: any) => apiClient.post('/classes', data),
   update: (id: string, data: any) => apiClient.patch(`/classes/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/classes/${id}`),
   assignLeader: (id: string, data: any) =>
     apiClient.post(`/classes/${id}/leaders`, data),
   removeLeader: (id: string, userId: string, role: string) =>
@@ -111,8 +121,10 @@ export const classesApi = {
 export const usersApi = {
   getAll: (params?: any) => apiClient.get('/users', { params }),
   getOne: (id: string) => apiClient.get(`/users/${id}`),
+  getRoles: () => apiClient.get<{ id: number; name: string }[]>('/users/roles'),
   create: (data: any) => apiClient.post('/users', data),
   update: (id: string, data: any) => apiClient.patch(`/users/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/users/${id}`),
   assignRole: (id: string, data: any) =>
     apiClient.post(`/users/${id}/roles`, data),
   removeRole: (id: string, roleId: string) =>

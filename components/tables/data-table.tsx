@@ -115,21 +115,22 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-4 min-w-0', className)}>
       {/* Bulk Actions */}
       {selectable && selectedIds.size > 0 && bulkActions && (
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <div className="text-sm text-gray-600">
             {selectedIds.size} item{selectedIds.size !== 1 ? 's' : ''} selected
           </div>
-          <div className="flex items-center gap-2">{bulkActions}</div>
+          <div className="flex flex-wrap items-center gap-2">{bulkActions}</div>
         </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-x-auto border border-gray-200 rounded-lg -mx-4 sm:mx-0">
-        <div className="inline-block min-w-full align-middle">
-          <table className="w-full min-w-[640px]">
+      {/* Table - horizontal scroll on mobile */}
+      <div className="w-full min-w-0">
+        <div className="overflow-x-auto overflow-y-visible border border-gray-200 rounded-lg overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="inline-block min-w-full align-middle">
+            <table className="w-full min-w-[640px] border-collapse">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {selectable && (
@@ -256,6 +257,7 @@ export function DataTable<T>({
             })}
           </tbody>
         </table>
+          </div>
         </div>
       </div>
 

@@ -13,6 +13,8 @@ import { ClassForm } from '@/components/forms/class-form';
 import { OfferingForm } from '@/components/forms/offering-form';
 import { Select } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/store/auth-store';
+import { ROLES } from '@/lib/constants';
 
 const LEADER_ROLES = [
   { value: 'LEADER', label: 'Leader' },
@@ -33,7 +35,11 @@ export default function ClassDetailPage() {
   const [isOfferingModalOpen, setIsOfferingModalOpen] = useState(false);
   const [selectedOffering, setSelectedOffering] = useState<any>(null);
   const [currentWindow, setCurrentWindow] = useState<any>(null);
-  
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [membersExpanded, setMembersExpanded] = useState(false);
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === ROLES.SUPER_ADMIN;
+
   const { data: classData, loading, error, refetch } = useApi(() =>
     classesApi.getOne(id)
   );
@@ -115,6 +121,25 @@ export default function ClassDetailPage() {
     }
   };
 
+  const handleDeleteClass = async () => {
+    const memberCount = classData?._count?.members ?? 0;
+    const message =
+      memberCount > 0
+        ? `Remove this class? This will permanently delete the class and all ${memberCount} member(s). This cannot be undone.`
+        : `Remove this class? This cannot be undone.`;
+    if (!confirm(message)) return;
+    try {
+      setIsDeleting(true);
+      await classesApi.delete(id);
+      toast.success('Class and all its members removed successfully');
+      router.push('/classes');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to remove class');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -149,6 +174,16 @@ export default function ClassDetailPage() {
           <Button variant="outline" onClick={() => setIsEditModalOpen(true)}>
             Edit
           </Button>
+          {isSuperAdmin && (
+            <Button
+              variant="outline"
+              onClick={handleDeleteClass}
+              disabled={isDeleting}
+              className="border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
+            >
+              {isDeleting ? 'Removing...' : 'Remove Class'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -221,31 +256,54 @@ export default function ClassDetailPage() {
         </Card>
       </div>
 
-      {/* Members */}
+      {/* Members - collapsible */}
       <Card>
-        <CardHeader>
-          <CardTitle>Members ({classData.members?.length || 0})</CardTitle>
+        <CardHeader className="pb-2">
+          <button
+            type="button"
+            onClick={() => setMembersExpanded((prev) => !prev)}
+            className="flex items-center gap-2 w-full text-left rounded-lg hover:bg-gray-50 active:bg-gray-100 -mx-2 px-2 py-1.5 transition-colors touch-manipulation"
+            aria-expanded={membersExpanded}
+          >
+            <span
+              className={`inline-block transition-transform ${membersExpanded ? 'rotate-90' : ''}`}
+              aria-hidden
+            >
+              ▶
+            </span>
+            <CardTitle className="!mb-0">
+              Members ({classData.members?.length || 0})
+            </CardTitle>
+          </button>
         </CardHeader>
         <CardContent>
           {classData.members && classData.members.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {classData.members.map((member: any) => (
-                <div
-                  key={member.id}
-                  className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  onClick={() => router.push(`/members/${member.id}`)}
-                >
-                  <p className="font-semibold">
-                    {member.firstName} {member.lastName}
-                  </p>
-                  {member.birthday && (
-                    <p className="text-sm text-gray-500">
-                      {new Date(member.birthday).toLocaleDateString()}
-                    </p>
-                  )}
+            <>
+              {membersExpanded ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {classData.members.map((member: any) => (
+                    <div
+                      key={member.id}
+                      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                      onClick={() => router.push(`/members/${member.id}`)}
+                    >
+                      <p className="font-semibold">
+                        {member.firstName} {member.lastName}
+                      </p>
+                      {member.birthday && (
+                        <p className="text-sm text-gray-500">
+                          {new Date(member.birthday).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              ) : (
+                <p className="text-sm text-gray-500">
+                  Tap to expand and view {classData.members.length} member{classData.members.length !== 1 ? 's' : ''}.
+                </p>
+              )}
+            </>
           ) : (
             <p className="text-sm text-gray-500">No members in this class</p>
           )}

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { membersApi } from '@/lib/api-services';
 import { usePaginatedApi } from '@/hooks/use-api';
+import { useAuthStore } from '@/store/auth-store';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/error-state';
@@ -19,6 +20,12 @@ interface Member {
   lastName: string;
   photoUrl?: string;
   birthday?: string;
+  phone?: string;
+  email?: string;
+  occupation?: string;
+  status?: string;
+  age?: number;
+  gender?: string;
   currentClass?: {
     id: string;
     name: string;
@@ -27,6 +34,8 @@ interface Member {
 
 export default function MembersPage() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
@@ -34,6 +43,11 @@ export default function MembersPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState<{ created: number; errors: { row: number; message: string }[] } | null>(null);
+  const importFileInputRef = useRef<HTMLInputElement>(null);
   const [filters, setFilters] = useState<Record<string, any>>({});
 
   const handleFilterChange = (key: string, value: any) => {
@@ -94,6 +108,31 @@ export default function MembersPage() {
     setPage(1);
   };
 
+  const handleImportCsv = async () => {
+    if (!importFile) return;
+    setImportLoading(true);
+    setImportResult(null);
+    try {
+      const { data } = await membersApi.uploadCsv(importFile);
+      setImportResult(data);
+      if (data.created > 0) refetch();
+    } catch (err: any) {
+      setImportResult({
+        created: 0,
+        errors: [{ row: 0, message: err?.response?.data?.message || err?.message || 'Upload failed.' }],
+      });
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
+  const closeImportModal = () => {
+    setIsImportModalOpen(false);
+    setImportFile(null);
+    setImportResult(null);
+    if (importFileInputRef.current) importFileInputRef.current.value = '';
+  };
+
   const filterOptions: FilterOption[] = [
     {
       type: 'date-range',
@@ -144,8 +183,28 @@ export default function MembersPage() {
     },
     {
       key: 'birthday',
-      header: 'Birthday',
-      render: (member) => formatDate(member.birthday),
+      header: 'Date of Birth',
+      render: (member) => (member.birthday ? formatDate(member.birthday) : '—'),
+    },
+    {
+      key: 'age',
+      header: 'Age',
+      render: (member) => (member.age != null ? String(member.age) : '—'),
+    },
+    {
+      key: 'gender',
+      header: 'Gender',
+      render: (member) => member.gender || '—',
+    },
+    {
+      key: 'occupation',
+      header: 'Occupation',
+      render: (member) => member.occupation || '—',
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (member) => member.status || '—',
     },
     {
       key: 'currentClass',
@@ -159,33 +218,45 @@ export default function MembersPage() {
   }
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+    <div className="min-w-0 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
         <div>
           <h1 className="text-2xl sm:text-4xl font-bold mb-2">Members</h1>
           <p className="text-gray-600 text-sm sm:text-base">Manage and view all members.</p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full sm:w-auto">Add Member</Button>
+        <div className="flex flex-wrap gap-2">
+          {isAdmin && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => { setImportResult(null); setIsImportModalOpen(true); }}
+              className="w-full sm:w-auto"
+            >
+              Import CSV
+            </Button>
+          )}
+          <Button onClick={() => setIsCreateModalOpen(true)} className="w-full sm:w-auto">Add Member</Button>
+        </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="mb-6 space-y-4">
+      <div className="mb-4 sm:mb-6 space-y-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search members..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                className="flex-1 min-w-0 px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-base sm:text-sm"
               />
-              <Button type="submit" className="w-full sm:w-auto">Search</Button>
+              <Button type="submit" className="w-full sm:w-auto shrink-0">Search</Button>
             </form>
           </CardContent>
         </Card>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 min-w-0">
           <FilterPanel
             filters={filterOptions}
             values={filters}
@@ -273,6 +344,53 @@ export default function MembersPage() {
             setIsCreateModalOpen(false);
           }}
         />
+      </Modal>
+
+      {/* Import CSV Modal (admin/super_admin only) */}
+      <Modal
+        isOpen={isImportModalOpen}
+        onClose={closeImportModal}
+        title="Import members from CSV"
+        size="md"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            CSV must include: First name, Last name, Gender, Date of Birth, Address, Phone Number, Platoon.
+            Optional: Nearest Bus-stop (appended to address), Next of Kin (Name and Contact) → emergency contact.
+          </p>
+          <input
+            ref={importFileInputRef}
+            type="file"
+            accept=".csv,text/csv,application/csv"
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-100 file:text-gray-700"
+            onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+          />
+          {importResult != null && (
+            <div className="rounded border p-3 text-sm">
+              <p className="font-medium text-green-700">{importResult.created} member(s) created.</p>
+              {importResult.errors.length > 0 && (
+                <div className="mt-2">
+                  <p className="font-medium text-amber-700">Errors:</p>
+                  <ul className="mt-1 list-disc pl-4 space-y-0.5 text-amber-800">
+                    {importResult.errors.map((e, i) => (
+                      <li key={i}>Row {e.row}: {e.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={closeImportModal}>Close</Button>
+            <Button
+              type="button"
+              onClick={handleImportCsv}
+              disabled={!importFile || importLoading}
+            >
+              {importLoading ? 'Importing…' : 'Import'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

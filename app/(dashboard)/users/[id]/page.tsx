@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { usersApi } from '@/lib/api-services';
 import { useApi } from '@/hooks/use-api';
+import { useAuthStore } from '@/store/auth-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading';
@@ -13,28 +14,35 @@ import { UserForm } from '@/components/forms/user-form';
 import { Select } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 
-const AVAILABLE_ROLES = [
-  { id: 1, name: 'super_admin', label: 'Super Admin' },
-  { id: 2, name: 'admin', label: 'Admin' },
-  { id: 3, name: 'platoon_leader', label: 'Platoon Leader' },
-  { id: 4, name: 'assistant_platoon_leader', label: 'Assistant Platoon Leader' },
-  { id: 5, name: 'children_teacher', label: 'Children Teacher' },
-  { id: 6, name: 'kitchen', label: 'Kitchen' },
-  { id: 7, name: 'distribution', label: 'Distribution' },
-  { id: 8, name: 'worker', label: 'Worker' },
-];
+function formatRoleLabel(name: string): string {
+  return name
+    .split('_')
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+    .join(' ');
+}
 
 export default function UserDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
+  const { user: currentUser } = useAuthStore();
+  const isSuperAdmin = currentUser?.role === 'super_admin';
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
   const [isAssigningRole, setIsAssigningRole] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [allRoles, setAllRoles] = useState<{ id: number; name: string }[]>([]);
   const { data: user, loading, error, refetch } = useApi(() =>
     usersApi.getOne(id)
   );
+
+  useEffect(() => {
+    usersApi
+      .getRoles()
+      .then((res) => setAllRoles(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setAllRoles([]));
+  }, []);
 
   const handleAssignRole = async () => {
     if (!selectedRoleId) {
@@ -70,9 +78,32 @@ export default function UserDetailPage() {
     }
   };
 
-  // Get roles that can be assigned (not already assigned)
+  const handleDeleteUser = async () => {
+    if (
+      !confirm(
+        `Are you sure you want to delete ${user?.firstName} ${user?.lastName}? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      await usersApi.delete(id);
+      toast.success('User deleted successfully');
+      router.push('/users');
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || 'Failed to delete user'
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Get roles that can be assigned (not already assigned) – use DB roles so IDs match
   const assignedRoleNames = user?.roles?.map((r: any) => r.role) || [];
-  const availableRolesToAssign = AVAILABLE_ROLES.filter(
+  const availableRolesToAssign = allRoles.filter(
     (role) => !assignedRoleNames.includes(role.name)
   );
 
@@ -112,6 +143,16 @@ export default function UserDetailPage() {
           <Button variant="outline" onClick={() => setIsEditModalOpen(true)}>
             Edit
           </Button>
+          {isSuperAdmin && (
+            <Button
+              variant="outline"
+              onClick={handleDeleteUser}
+              disabled={isDeleting || currentUser?.id === id}
+              className="border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete User'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -162,24 +203,23 @@ export default function UserDetailPage() {
                 <p className="text-sm text-gray-500 mb-2">Roles</p>
               {user.roles && user.roles.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {user.roles.map((userRole: any) => {
-                    const roleInfo = AVAILABLE_ROLES.find((r) => r.name === userRole.role);
-                    return (
+                  {user.roles.map((userRole: any) => (
                       <div
                         key={userRole.id}
                         className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm group"
                     >
-                        <span>{roleInfo?.label || userRole.role}</span>
-                        <button
-                          onClick={() => handleRemoveRole(userRole.id)}
-                          className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Remove role"
-                        >
-                          ×
-                        </button>
+                        <span>{formatRoleLabel(userRole.role)}</span>
+                        {isSuperAdmin && (
+                          <button
+                            onClick={() => handleRemoveRole(userRole.id)}
+                            className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Remove role"
+                          >
+                            ×
+                          </button>
+                        )}
                       </div>
-                    );
-                  })}
+                  ))}
               </div>
             ) : (
               <p className="text-sm text-gray-500">No roles assigned</p>
@@ -257,7 +297,7 @@ export default function UserDetailPage() {
               { value: '', label: 'Choose a role...' },
               ...availableRolesToAssign.map((role) => ({
                 value: role.id.toString(),
-                label: role.label,
+                label: formatRoleLabel(role.name),
               })),
             ]}
           />

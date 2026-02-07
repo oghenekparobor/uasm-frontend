@@ -192,12 +192,34 @@ export default function MemberDetailPage() {
               <p className="text-sm text-gray-500">Last Name</p>
               <p className="font-semibold">{member.lastName}</p>
             </div>
-            {member.birthday && (
+            <div>
+              <p className="text-sm text-gray-500">Date of Birth</p>
+              <p className="font-semibold">
+                {member.birthday ? formatDate(member.birthday) : '—'}
+              </p>
+            </div>
+            {member.age != null && (
               <div>
-                <p className="text-sm text-gray-500">Birthday</p>
-                <p className="font-semibold">
-                  {formatDate(member.birthday)}
-                </p>
+                <p className="text-sm text-gray-500">Age</p>
+                <p className="font-semibold">{member.age}</p>
+              </div>
+            )}
+            {member.gender && (
+              <div>
+                <p className="text-sm text-gray-500">Gender</p>
+                <p className="font-semibold">{member.gender}</p>
+              </div>
+            )}
+            {member.occupation && (
+              <div>
+                <p className="text-sm text-gray-500">Occupation</p>
+                <p className="font-semibold">{member.occupation}</p>
+              </div>
+            )}
+            {member.status && (
+              <div>
+                <p className="text-sm text-gray-500">Status</p>
+                <p className="font-semibold">{member.status}</p>
               </div>
             )}
             {member.currentClass && (
@@ -215,26 +237,30 @@ export default function MemberDetailPage() {
             <CardTitle>Contact Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {member.phone && (
-              <div>
-                <p className="text-sm text-gray-500">Phone Number</p>
-                <p className="font-semibold">
+            <div>
+              <p className="text-sm text-gray-500">Phone Number</p>
+              <p className="font-semibold">
+                {member.phone ? (
                   <a href={`tel:${member.phone}`} className="text-blue-600 hover:underline">
                     {member.phone}
                   </a>
-                </p>
-              </div>
-            )}
-            {member.email && (
-              <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-semibold">
+                ) : (
+                  '—'
+                )}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Email</p>
+              <p className="font-semibold">
+                {member.email ? (
                   <a href={`mailto:${member.email}`} className="text-blue-600 hover:underline">
                     {member.email}
                   </a>
-                </p>
-              </div>
-            )}
+                ) : (
+                  '—'
+                )}
+              </p>
+            </div>
             {member.address && (
               <div>
                 <p className="text-sm text-gray-500">Address</p>
@@ -247,9 +273,9 @@ export default function MemberDetailPage() {
                 <p className="font-semibold whitespace-pre-line">{member.emergencyContact}</p>
               </div>
             )}
-            {!member.phone && !member.email && !member.address && !member.emergencyContact && (
+            {!member.phone && !member.email && !member.address && !member.emergencyContact ? (
               <p className="text-sm text-gray-400">No contact information available</p>
-            )}
+            ) : null}
           </CardContent>
         </Card>
 

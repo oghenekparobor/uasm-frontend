@@ -13,6 +13,7 @@ import { ClassForm } from '@/components/forms/class-form';
 import { DataTable, type Column, type SortDirection, ExportButton } from '@/components/tables';
 import { FilterPanel, type FilterOption, PresetManager } from '@/components/filters';
 import { Card, CardContent } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 
 interface Class {
   id: string;
@@ -35,6 +36,8 @@ export default function ClassesPage() {
   const [filters, setFilters] = useState<Record<string, any>>({});
 
   const isAdmin = user?.role === ROLES.SUPER_ADMIN || user?.role === ROLES.ADMIN;
+  const isSuperAdmin = user?.role === ROLES.SUPER_ADMIN;
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -60,9 +63,9 @@ export default function ClassesPage() {
   const params = {
     page,
     limit,
-    search: search || undefined,
-    sort: sortKey,
-    order: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
+    search: search?.trim() || undefined,
+    sortBy: sortKey,
+    sortOrder: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
     ...filters,
   };
 
@@ -75,6 +78,26 @@ export default function ClassesPage() {
     setSortKey(direction ? key : undefined);
     setSortDirection(direction);
     setPage(1);
+  };
+
+  const handleDeleteClass = async (cls: Class, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const memberCount = (cls as any)._count?.members ?? 0;
+    const message =
+      memberCount > 0
+        ? `Remove "${cls.name}"? This will permanently delete the class and all ${memberCount} member(s). This cannot be undone.`
+        : `Remove "${cls.name}"? This cannot be undone.`;
+    if (!confirm(message)) return;
+    try {
+      setDeletingId(cls.id);
+      await classesApi.delete(cls.id);
+      toast.success('Class and all its members removed successfully');
+      refetch();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to remove class');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const filterOptions: FilterOption[] = [
@@ -196,6 +219,15 @@ export default function ClassesPage() {
             >
               View Details
             </button>
+            {isSuperAdmin && (
+              <button
+                onClick={(e) => handleDeleteClass(cls, e)}
+                disabled={deletingId === cls.id}
+                className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 text-red-700 transition-colors disabled:opacity-50"
+              >
+                {deletingId === cls.id ? 'Removing...' : 'Remove Class'}
+              </button>
+            )}
           </>
         )}
         selectable

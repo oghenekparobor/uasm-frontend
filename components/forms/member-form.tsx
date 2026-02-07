@@ -59,9 +59,10 @@ export function MemberForm({
       if (initialData) {
         Object.keys(initialData).forEach((key) => {
           if (key === 'birthday' && initialData[key]) {
-            // Convert birthday to date input format
             const date = new Date(initialData[key]);
             setValue('birthday', date.toISOString().split('T')[0]);
+          } else if (key === 'age') {
+            setValue('age', initialData.age != null ? String(initialData.age) : '');
           } else {
             setValue(key as any, initialData[key]);
           }
@@ -107,7 +108,7 @@ export function MemberForm({
       </div>
 
       <Input
-        label="Birthday"
+        label="Date of Birth"
         type="date"
         {...register('birthday')}
         error={errors.birthday?.message}
@@ -125,6 +126,41 @@ export function MemberForm({
           type="email"
           {...register('email')}
           error={errors.email?.message}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          label="Occupation"
+          {...register('occupation')}
+          error={errors.occupation?.message}
+          placeholder="e.g. Student, Teacher"
+        />
+        <Input
+          label="Status"
+          {...register('status')}
+          error={errors.status?.message}
+          placeholder="e.g. Active, Inactive"
+        />
+        <Input
+          label="Age"
+          type="number"
+          min={0}
+          max={150}
+          {...register('age')}
+          error={errors.age?.message}
+          placeholder="Optional"
+        />
+        <Select
+          label="Gender"
+          {...register('gender')}
+          error={errors.gender?.message}
+          options={[
+            { value: '', label: 'Select (optional)' },
+            { value: 'Male', label: 'Male' },
+            { value: 'Female', label: 'Female' },
+            { value: 'Other', label: 'Other' },
+          ]}
         />
       </div>
 

@@ -40,15 +40,15 @@ export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="fixed top-0 right-0 left-0 lg:left-64 h-16 border-b border-gray-200 bg-white z-30">
       <div className="flex h-full items-center justify-between px-4 sm:px-6">
-        {/* Mobile menu button */}
+        {/* Mobile menu button - min touch target 44px, touch-manipulation removes tap delay */}
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 -ml-2 text-gray-600 hover:text-black active:text-black transition-colors relative z-50"
+          className="lg:hidden min-w-[44px] min-h-[44px] p-2 -ml-2 flex items-center justify-center text-gray-600 hover:text-black active:text-black transition-colors relative z-[60] touch-manipulation cursor-pointer"
           aria-label="Toggle menu"
           type="button"
         >
           <svg
-            className="h-6 w-6"
+            className="h-6 w-6 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

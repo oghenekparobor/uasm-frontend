@@ -22,8 +22,18 @@ export default function AttendanceWindowDetailPage() {
   const [attendanceOverview, setAttendanceOverview] = useState<any[]>([]);
   const [loadingOverview, setLoadingOverview] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  
+  const [expandedClassIds, setExpandedClassIds] = useState<Set<string>>(new Set());
+
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+
+  const toggleMembers = (classId: string) => {
+    setExpandedClassIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(classId)) next.delete(classId);
+      else next.add(classId);
+      return next;
+    });
+  };
   
   const { data: window, loading, error, refetch } = useApi(() =>
     attendanceApi.getWindow(id)
@@ -294,33 +304,52 @@ export default function AttendanceWindowDetailPage() {
 
                       {marked > 0 && (
                         <div className="mt-4">
-                          <p className="text-sm font-medium text-gray-700 mb-2">
-                            Members:
-                          </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {item.members.map((member: any) => {
-                              const status = member.attendance?.status;
-                              return (
-                                <div
-                                  key={member.id}
-                                  className={`flex items-center justify-between p-2 rounded text-sm ${
-                                    status === 'present'
-                                      ? 'bg-green-50 text-green-700'
-                                      : status === 'absent'
-                                      ? 'bg-red-50 text-red-700'
-                                      : 'bg-gray-50 text-gray-500'
-                                  }`}
-                                >
-                                  <span>
-                                    {member.firstName} {member.lastName}
-                                  </span>
-                                  <span className="ml-2">
-                                    {status === 'present' ? '✓' : status === 'absent' ? '×' : '○'}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleMembers(item.class.id)}
+                            className="flex items-center gap-2 w-full text-left py-2 px-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+                            aria-expanded={expandedClassIds.has(item.class.id)}
+                            aria-controls={`members-${item.class.id}`}
+                          >
+                            <span
+                              className={`inline-block transition-transform ${expandedClassIds.has(item.class.id) ? 'rotate-90' : ''}`}
+                              aria-hidden
+                            >
+                              ▶
+                            </span>
+                            <span className="text-sm font-medium text-gray-700">
+                              {expandedClassIds.has(item.class.id) ? 'Hide members' : `See members (${marked})`}
+                            </span>
+                          </button>
+                          {expandedClassIds.has(item.class.id) && (
+                            <div
+                              id={`members-${item.class.id}`}
+                              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2"
+                            >
+                              {item.members.map((member: any) => {
+                                const status = member.attendance?.status;
+                                return (
+                                  <div
+                                    key={member.id}
+                                    className={`flex items-center justify-between p-2 rounded text-sm ${
+                                      status === 'present'
+                                        ? 'bg-green-50 text-green-700'
+                                        : status === 'absent'
+                                        ? 'bg-red-50 text-red-700'
+                                        : 'bg-gray-50 text-gray-500'
+                                    }`}
+                                  >
+                                    <span>
+                                      {member.firstName} {member.lastName}
+                                    </span>
+                                    <span className="ml-2">
+                                      {status === 'present' ? '✓' : status === 'absent' ? '×' : '○'}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

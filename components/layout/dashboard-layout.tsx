@@ -24,10 +24,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <AuthGuard>
       <div className="flex h-screen overflow-hidden">
         <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-        <div className="flex flex-1 flex-col lg:ml-64">
+        <div className="flex flex-1 flex-col min-w-0 lg:ml-64">
           <Header onMenuClick={toggleSidebar} />
-          <main className="flex-1 overflow-y-auto pt-16">
-            <div className="p-4 sm:p-6">{children}</div>
+          <main className="flex-1 overflow-y-auto overflow-x-hidden pt-16 min-w-0">
+            <div className="p-4 sm:p-6 min-w-0">{children}</div>
           </main>
         </div>
       </div>

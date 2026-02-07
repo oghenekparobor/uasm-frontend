@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
@@ -107,13 +107,25 @@ const navigationItems: NavItem[] = [
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuthStore();
+  const overlayReadyRef = useRef(false);
 
-  // Close sidebar when route changes on mobile
+  // Close drawer when user navigates (pathname changes) on mobile – do NOT run when isOpen changes or we’d close right after opening
   useEffect(() => {
-    if (isOpen && window.innerWidth < 1024) {
-      onClose();
+    if (typeof window === 'undefined' || window.innerWidth >= 1024) return;
+    onClose();
+  }, [pathname]);
+
+  // Prevent overlay from closing the drawer on the same tap that opened it (delay before overlay is “active”)
+  useEffect(() => {
+    if (!isOpen) {
+      overlayReadyRef.current = false;
+      return;
     }
-  }, [pathname, isOpen, onClose]);
+    const t = setTimeout(() => {
+      overlayReadyRef.current = true;
+    }, 350);
+    return () => clearTimeout(t);
+  }, [isOpen]);
 
   if (!user) return null;
 
@@ -136,24 +148,36 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     return item.roles.some((requiredRole) => effectiveRoles.includes(requiredRole));
   });
 
+  const handleOverlayClick = () => {
+    if (!overlayReadyRef.current) return;
+    onClose();
+  };
+
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Mobile drawer overlay – dims content, tap to close (after short delay so open-tap doesn’t close) */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={onClose}
+          role="button"
+          tabIndex={-1}
+          aria-label="Close menu"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden transition-opacity duration-300"
+          onClick={handleOverlayClick}
+          onKeyDown={(e) => e.key === 'Escape' && handleOverlayClick()}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Mobile: drawer (slides in from left). Desktop: fixed sidebar. */}
       <aside
         className={cn(
-          'fixed left-0 top-0 h-full w-64 border-r border-gray-200 bg-white z-50 transition-transform duration-300 ease-in-out',
-          // On desktop (lg+), always visible
-          'lg:translate-x-0',
-          // On mobile, show/hide based on isOpen state
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed left-0 top-0 h-full w-64 bg-white z-50 transition-transform duration-300 ease-out',
+          // Desktop: always visible, no shadow
+          'lg:translate-x-0 lg:border-r lg:border-gray-200',
+          // Mobile: drawer with shadow when open
+          'lg:shadow-none',
+          isOpen ? 'translate-x-0 shadow-xl' : '-translate-x-full',
+          // When closed on mobile, don’t capture touches so hamburger works
+          !isOpen && 'pointer-events-none lg:pointer-events-auto'
         )}
       >
         <div className="flex h-full flex-col">

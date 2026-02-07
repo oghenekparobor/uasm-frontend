@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { distributionApi } from '@/lib/api-services';
 import { useApi } from '@/hooks/use-api';
@@ -10,6 +10,9 @@ import { LoadingSpinner } from '@/components/ui/loading';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
 import { AllocateFoodForm } from '@/components/forms/distribution-form';
+
+// Synthetic Workers class (excluded from classes and distribution)
+const WORKERS_CLASS_ID = '00000000-0000-0000-0000-00000000WORK';
 
 export default function DistributionBatchDetailPage() {
   const params = useParams();
@@ -26,6 +29,16 @@ export default function DistributionBatchDetailPage() {
   const { data: allocations, refetch: refetchAllocations } = useApi(() =>
     distributionApi.getAllocations({ batchId: id })
   );
+
+  const isAttendanceWindowOpen = useMemo(() => {
+    if (!batch?.attendanceWindow) return false;
+    const win = batch.attendanceWindow;
+    if (!win?.opensAt || !win?.closesAt) return false;
+    const now = new Date();
+    const opensAt = new Date(win.opensAt);
+    const closesAt = new Date(win.closesAt);
+    return now >= opensAt && now <= closesAt;
+  }, [batch?.attendanceWindow]);
 
   if (loading) {
     return (
@@ -168,8 +181,16 @@ export default function DistributionBatchDetailPage() {
           ) : !classesWithAttendance || !classesWithAttendance.classes || classesWithAttendance.classes.length === 0 ? (
             <p className="text-gray-500 text-center py-4">No classes available</p>
           ) : (
+            <>
+              {!isAttendanceWindowOpen && (
+                <p className="text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-4 text-sm">
+                  Allocation is disabled because the attendance window for this batch is closed.
+                </p>
+              )}
             <div className="space-y-4">
-              {classesWithAttendance.classes.map((cls: any) => {
+              {(classesWithAttendance.classes as any[])
+                .filter((cls: any) => !cls.isWorkers && cls.id !== WORKERS_CLASS_ID)
+                .map((cls: any) => {
                 const existingAllocation = allocations?.data?.find(
                   (a: any) => a.classId === cls.id
                 ) || cls.allocation;
@@ -220,6 +241,8 @@ export default function DistributionBatchDetailPage() {
                       <Button
                         onClick={() => setAllocationModalOpen(cls.id)}
                         variant={existingAllocation ? 'outline' : 'default'}
+                        disabled={!isAttendanceWindowOpen}
+                        title={!isAttendanceWindowOpen ? 'Attendance window is closed' : undefined}
                       >
                         {existingAllocation ? 'Update Allocation' : 'Allocate'}
                       </Button>
@@ -228,19 +251,22 @@ export default function DistributionBatchDetailPage() {
                 );
               })}
             </div>
+            </>
           )}
         </CardContent>
       </Card>
 
       {/* Existing Allocations */}
-      {allocations?.data && allocations.data.length > 0 && (
+      {allocations?.data && allocations.data.filter((a: any) => a.classId !== WORKERS_CLASS_ID).length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Existing Allocations</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {allocations.data.map((allocation: any) => (
+              {allocations.data
+                .filter((allocation: any) => allocation.classId !== WORKERS_CLASS_ID)
+                .map((allocation: any) => (
                 <div
                   key={allocation.id}
                   className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50"
@@ -258,6 +284,8 @@ export default function DistributionBatchDetailPage() {
                   <Button
                     variant="outline"
                     onClick={() => setAllocationModalOpen(allocation.classId)}
+                    disabled={!isAttendanceWindowOpen}
+                    title={!isAttendanceWindowOpen ? 'Attendance window is closed' : undefined}
                   >
                     Edit
                   </Button>
