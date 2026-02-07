@@ -2,27 +2,33 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { usersApi } from '@/lib/api-services';
+import { classesApi } from '@/lib/api-services';
 import { usePaginatedApi } from '@/hooks/use-api';
+import { useAuthStore } from '@/store/auth-store';
+import { ROLES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
-import { UserForm } from '@/components/forms/user-form';
+import { ClassForm } from '@/components/forms/class-form';
 import { DataTable, type Column, type SortDirection, ExportButton } from '@/components/tables';
 import { FilterPanel, type FilterOption, PresetManager } from '@/components/filters';
 import { Card, CardContent } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 
-interface User {
+interface Class {
   id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  roles?: Array<{ role: string }>;
+  name: string;
+  type: string;
+  capacity?: number;
+  description?: string;
+  _count?: {
+    members?: number;
+  };
 }
 
-export default function UsersPage() {
+export default function ClassesPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
@@ -31,6 +37,10 @@ export default function UsersPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filters, setFilters] = useState<Record<string, any>>({});
+
+  const isAdmin = user?.role === ROLES.SUPER_ADMIN || user?.role === ROLES.ADMIN;
+  const isSuperAdmin = user?.role === ROLES.SUPER_ADMIN;
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -56,14 +66,14 @@ export default function UsersPage() {
   const params = {
     page,
     limit,
-    search: search || undefined,
-    sort: sortKey,
-    order: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
+    search: search?.trim() || undefined,
+    sortBy: sortKey,
+    sortOrder: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
     ...filters,
   };
 
-  const { data: users, loading, error, meta, refetch } = usePaginatedApi(
-    usersApi.getAll,
+  const { data: classes, loading, error, meta, refetch } = usePaginatedApi<Class>(
+    classesApi.getAll,
     params
   );
 
@@ -73,68 +83,70 @@ export default function UsersPage() {
     setPage(1);
   };
 
+  const handleDeleteClass = async (cls: Class, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const memberCount = (cls as any)._count?.members ?? 0;
+    const message =
+      memberCount > 0
+        ? `Remove "${cls.name}"? This will permanently delete the class and all ${memberCount} member(s). This cannot be undone.`
+        : `Remove "${cls.name}"? This cannot be undone.`;
+    if (!confirm(message)) return;
+    try {
+      setDeletingId(cls.id);
+      await classesApi.delete(cls.id);
+      toast.success('Class and all its members removed successfully');
+      refetch();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to remove class');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const filterOptions: FilterOption[] = [
     {
       type: 'multi-select',
-      key: 'roles',
-      label: 'Roles',
+      key: 'types',
+      label: 'Class Types',
       options: [
-        { value: 'worker', label: 'Worker' },
-        { value: 'platoon_leader', label: 'Platoon Leader' },
-        { value: 'assistant_platoon_leader', label: 'Assistant Platoon Leader' },
-        { value: 'children_teacher', label: 'Children Teacher' },
-        { value: 'kitchen', label: 'Kitchen' },
-        { value: 'distribution', label: 'Distribution' },
-        { value: 'admin', label: 'Admin' },
-        { value: 'super_admin', label: 'Super Admin' },
+        { value: 'PLATOON', label: 'Platoon' },
+        { value: 'CHILDREN', label: 'Children Class' },
       ],
     },
     {
-      type: 'select',
-      key: 'isActive',
-      label: 'Status',
-      options: [
-        { value: 'true', label: 'Active' },
-        { value: 'false', label: 'Inactive' },
-      ],
+      type: 'text',
+      key: 'name',
+      label: 'Class Name',
+      placeholder: 'Filter by name...',
     },
   ];
 
-  const columns: Column<User>[] = [
+  const columns: Column<Class>[] = [
     {
-      key: 'firstName',
-      header: 'First Name',
+      key: 'name',
+      header: 'Name',
       sortable: true,
     },
     {
-      key: 'lastName',
-      header: 'Last Name',
+      key: 'type',
+      header: 'Type',
       sortable: true,
+      render: (cls) => (
+        <span className="px-2 py-1 rounded bg-gray-100 text-gray-800 text-xs">
+          {cls.type}
+        </span>
+      ),
     },
     {
-      key: 'email',
-      header: 'Email',
-      sortable: true,
+      key: '_count',
+      header: 'Members',
+      sortable: false,
+      render: (cls) => cls._count?.members || 0,
     },
     {
-      key: 'phone',
-      header: 'Phone',
-      render: (user) => user.phone || '—',
-    },
-    {
-      key: 'roles',
-      header: 'Roles',
-      render: (user) =>
-        user.roles && user.roles.length > 0
-          ? user.roles.map((r: any) => (
-              <span
-                key={r.role}
-                className="inline-block px-2 py-1 mr-1 mb-1 rounded bg-gray-100 text-gray-800 text-xs"
-              >
-                {r.role}
-              </span>
-            ))
-          : 'No roles',
+      key: 'description',
+      header: 'Description',
+      render: (cls) => cls.description || '—',
     },
   ];
 
@@ -146,10 +158,14 @@ export default function UsersPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-bold mb-2">Users</h1>
-          <p className="text-gray-600 text-sm sm:text-base">Manage workers and their roles.</p>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">Classes</h1>
+          <p className="text-gray-600 text-sm sm:text-base">
+            {isAdmin ? 'Manage classes and platoons.' : 'View your assigned classes.'}
+          </p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full sm:w-auto">Add User</Button>
+        {isAdmin && (
+        <Button onClick={() => setIsCreateModalOpen(true)} className="w-full sm:w-auto">Add Class</Button>
+        )}
       </div>
 
       {/* Search and Filters */}
@@ -161,7 +177,7 @@ export default function UsersPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search users by name or email..."
+                placeholder="Search classes..."
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               />
               <Button type="submit" className="w-full sm:w-auto">Search</Button>
@@ -177,7 +193,7 @@ export default function UsersPage() {
             onClear={handleClearFilters}
           />
           <PresetManager
-            pageKey="users"
+            pageKey="classes"
             currentFilters={{ ...filters, search }}
             onApplyPreset={handleApplyPreset}
           />
@@ -185,9 +201,9 @@ export default function UsersPage() {
       </div>
 
       <DataTable
-        data={users || []}
+        data={classes || []}
         columns={columns}
-        keyExtractor={(user) => user.id}
+        keyExtractor={(cls) => cls.id}
         pagination={meta}
         onPageChange={setPage}
         onLimitChange={(newLimit) => {
@@ -197,55 +213,59 @@ export default function UsersPage() {
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
-        onRowClick={(user) => router.push(`/users/${user.id}`)}
-        rowActions={(user) => (
+        onRowClick={(cls) => router.push(`/classes/${cls.id}`)}
+        rowActions={(cls) => (
           <>
             <button
-              onClick={() => router.push(`/users/${user.id}`)}
+              onClick={() => router.push(`/classes/${cls.id}`)}
               className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
             >
               View Details
             </button>
+            {isSuperAdmin && (
+              <button
+                onClick={(e) => handleDeleteClass(cls, e)}
+                disabled={deletingId === cls.id}
+                className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 text-red-700 transition-colors disabled:opacity-50"
+              >
+                {deletingId === cls.id ? 'Removing...' : 'Remove Class'}
+              </button>
+            )}
           </>
         )}
         selectable
         onSelectionChange={setSelectedIds}
         bulkActions={
           <ExportButton
-            data={users || []}
+            data={classes || []}
             columns={columns.map((col) => ({
               key: col.key,
               header: col.header,
-              render: (user) => {
+              render: (cls: Class) => {
                 if (col.render) {
-                  const rendered = col.render(user);
-                  if (typeof rendered === 'string') return rendered;
-                  // Handle React nodes (like role badges)
-                  if (col.key === 'roles') {
-                    return user.roles?.map((r: any) => r.role).join(', ') || 'No roles';
-                  }
-                  return String(rendered);
+                  const rendered = col.render(cls);
+                  return typeof rendered === 'string' ? rendered : String(rendered);
                 }
-                return String((user as any)[col.key] || '');
+                return String((cls as any)[col.key] || '');
               },
             }))}
             selectedIds={selectedIds}
-            keyExtractor={(u) => u.id}
-            filename="users"
+            keyExtractor={(c) => c.id}
+            filename="classes"
           />
         }
         loading={loading}
-        emptyMessage="No users found. Get started by adding a new user."
+        emptyMessage="No classes found. Get started by creating a new class."
       />
 
-      {/* Create User Modal */}
+      {/* Create Class Modal */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Add User"
+        title="Add Class"
         size="md"
       >
-        <UserForm
+        <ClassForm
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onSuccess={() => {

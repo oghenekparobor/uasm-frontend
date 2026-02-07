@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
   createUserSchema, 
@@ -37,7 +37,7 @@ export function UserForm({
     reset,
     setValue,
   } = useForm<CreateUserInput | UpdateUserInput>({
-    resolver: zodResolver(isEditing ? updateUserSchema : createUserSchema),
+    resolver: zodResolver((isEditing ? updateUserSchema : createUserSchema) as any) as Resolver<CreateUserInput | UpdateUserInput>,
     mode: 'onChange', // Enable real-time validation
   });
 

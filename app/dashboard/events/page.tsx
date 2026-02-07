@@ -38,7 +38,7 @@ export default function EventsPage() {
     order: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
   };
 
-  const { data: events, loading, error, meta, refetch } = usePaginatedApi(
+  const { data: events, loading, error, meta, refetch } = usePaginatedApi<Event>(
     eventsApi.getAll,
     params
   );

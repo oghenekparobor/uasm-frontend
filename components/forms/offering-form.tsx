@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createOfferingSchema,
@@ -128,7 +128,7 @@ export function OfferingForm({
         <Select
           label="Attendance Window"
           {...register('attendanceWindowId')}
-          error={errors.attendanceWindowId?.message}
+          error={(errors as FieldErrors<CreateOfferingInput>).attendanceWindowId?.message}
           options={[
             { value: '', label: 'Select attendance window' },
             ...windows.map((window) => ({

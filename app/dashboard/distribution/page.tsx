@@ -19,7 +19,7 @@ export default function DistributionPage() {
   const { data: currentBatch, loading: batchLoading, refetch: refetchBatch } =
     useApi(distributionApi.getCurrentBatch);
   const { data: batches, loading: batchesLoading, error, refetch } =
-    usePaginatedApi(distributionApi.getBatches, { page: 1, limit: 10 });
+    usePaginatedApi<Record<string, unknown>>(distributionApi.getBatches, { page: 1, limit: 10 });
 
   const loading = batchLoading || batchesLoading;
 

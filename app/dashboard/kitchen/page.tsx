@@ -23,13 +23,13 @@ export default function KitchenPage() {
     loading: recipesLoading,
     error: recipesError,
     refetch: refetchRecipes,
-  } = usePaginatedApi(kitchenApi.getRecipes, { page: 1, limit: 10 });
+  } = usePaginatedApi<Record<string, unknown>>(kitchenApi.getRecipes, { page: 1, limit: 10 });
   const {
     data: production,
     loading: productionLoading,
     error: productionError,
     refetch: refetchProduction,
-  } = usePaginatedApi(kitchenApi.getProduction, { page: 1, limit: 10 });
+  } = usePaginatedApi<Record<string, unknown>>(kitchenApi.getProduction, { page: 1, limit: 10 });
 
   const loading = recipesLoading || productionLoading;
   const error = recipesError || productionError;

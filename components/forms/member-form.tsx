@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createMemberSchema, type CreateMemberInput } from '@/lib/validations/member.schema';
+import { createMemberSchema, type CreateMemberInput, type CreateMemberFormInput } from '@/lib/validations/member.schema';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select } from '@/components/ui/select';
@@ -35,7 +35,7 @@ export function MemberForm({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<CreateMemberInput>({
+  } = useForm<CreateMemberFormInput>({
     resolver: zodResolver(createMemberSchema),
     defaultValues: {
       currentClassId: classId || '',
@@ -73,14 +73,15 @@ export function MemberForm({
     }
   }, [isOpen, initialData, reset, setValue]);
 
-  const onSubmit = async (data: CreateMemberInput) => {
+  const onSubmit = async (data: CreateMemberFormInput) => {
     try {
       setLoading(true);
+      const parsed = createMemberSchema.parse(data) as CreateMemberInput;
       if (initialData) {
-        await membersApi.update(initialData.id, data);
+        await membersApi.update(initialData.id, parsed);
         toast.success('Member updated successfully');
       } else {
-        await membersApi.create(data);
+        await membersApi.create(parsed);
         toast.success('Member created successfully');
       }
       onSuccess();

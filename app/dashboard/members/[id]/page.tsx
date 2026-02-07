@@ -35,7 +35,7 @@ export default function MemberDetailPage() {
     { page: 1, limit: 100, sortBy: 'markedAt', sortOrder: 'desc' }
   );
   // Fetch empowerment requests for this member
-  const { data: empowermentRequests, loading: empowermentLoading } = usePaginatedApi(
+  const { data: empowermentRequests, loading: empowermentLoading } = usePaginatedApi<Record<string, unknown>>(
     (params) => empowermentApi.getAll({ ...params, memberId: id }),
     { page: 1, limit: 100 }
   );

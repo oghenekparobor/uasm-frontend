@@ -94,7 +94,7 @@ export default function MembersPage() {
   };
 
   const { data: members, loading, error, meta, refetch } =
-    usePaginatedApi(membersApi.getAll, params);
+    usePaginatedApi<Member>(membersApi.getAll, params);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -304,7 +304,7 @@ export default function MembersPage() {
             columns={columns.map((col) => ({
               key: col.key,
               header: col.header,
-              render: (member) => {
+              render: (member: Member) => {
                 if (col.render) {
                   const rendered = col.render(member);
                   return typeof rendered === 'string' ? rendered : String(rendered);

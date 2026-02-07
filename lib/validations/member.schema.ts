@@ -28,5 +28,7 @@ export const updateMemberSchema = createMemberSchema.partial().extend({
 });
 
 export type CreateMemberInput = z.infer<typeof createMemberSchema>;
+/** Form values before parsing (e.g. age as string from input) */
+export type CreateMemberFormInput = z.input<typeof createMemberSchema>;
 export type UpdateMemberInput = z.infer<typeof updateMemberSchema>;
 

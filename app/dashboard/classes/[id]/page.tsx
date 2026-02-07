@@ -56,7 +56,7 @@ export default function ClassDetailPage() {
   }, []);
 
   // Fetch offerings for this class
-  const { data: offerings, loading: offeringsLoading, refetch: refetchOfferings } = usePaginatedApi(
+  const { data: offerings, loading: offeringsLoading, refetch: refetchOfferings } = usePaginatedApi<Record<string, unknown>>(
     (params) => offeringsApi.getAll({ ...params, classId: id }),
     { page: 1, limit: 100, sortBy: 'recordedAt', sortOrder: 'desc' }
   );

@@ -2,39 +2,29 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { empowermentApi } from '@/lib/api-services';
+import { requestsApi } from '@/lib/api-services';
 import { usePaginatedApi } from '@/hooks/use-api';
 import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/error-state';
 import { Modal } from '@/components/ui/modal';
-import {
-  CreateEmpowermentForm,
-  ApproveEmpowermentForm,
-} from '@/components/forms/empowerment-form';
-import { DataTable, type Column, type SortDirection, ExportButton } from '@/components/tables';
+import { RequestForm } from '@/components/forms/request-form';
+import { DataTable, type Column, type SortDirection } from '@/components/tables';
 
-interface EmpowermentRequest {
+interface Request {
   id: string;
   type: string;
   description?: string;
   status: string;
-  member?: {
-    firstName: string;
-    lastName: string;
-  };
   createdAt: string;
 }
 
-export default function EmpowermentPage() {
+export default function RequestsPage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [sortKey, setSortKey] = useState<string>();
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
 
   const params = {
     page,
@@ -43,8 +33,8 @@ export default function EmpowermentPage() {
     order: sortDirection === 'asc' ? 'asc' : sortDirection === 'desc' ? 'desc' : undefined,
   };
 
-  const { data: requests, loading, error, meta, refetch } = usePaginatedApi(
-    empowermentApi.getAll,
+  const { data: requests, loading, error, meta, refetch } = usePaginatedApi<Request>(
+    requestsApi.getAll,
     params
   );
 
@@ -54,15 +44,25 @@ export default function EmpowermentPage() {
     setPage(1);
   };
 
-  const columns: Column<EmpowermentRequest>[] = [
-    {
-      key: 'member',
-      header: 'Member',
-      render: (request) =>
-        request.member
-          ? `${request.member.firstName} ${request.member.lastName}`
-          : 'N/A',
-    },
+  const handleApprove = async (requestId: string) => {
+    try {
+      await requestsApi.approve(requestId);
+      refetch();
+    } catch (error) {
+      console.error('Failed to approve request:', error);
+    }
+  };
+
+  const handleReject = async (requestId: string) => {
+    try {
+      await requestsApi.reject(requestId);
+      refetch();
+    } catch (error) {
+      console.error('Failed to reject request:', error);
+    }
+  };
+
+  const columns: Column<Request>[] = [
     {
       key: 'type',
       header: 'Type',
@@ -107,22 +107,12 @@ export default function EmpowermentPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Empowerment</h1>
-          <p className="text-gray-600">Manage empowerment requests.</p>
+          <h1 className="text-4xl font-bold mb-2">Requests</h1>
+          <p className="text-gray-600">View and manage requests.</p>
         </div>
-        <div className="flex gap-3">
-          <ExportButton
-            data={[]}
-            columns={[]}
-            filename="empowerment-requests"
-            serverExport={{
-              type: 'empowerment-requests',
-            }}
-          />
-          <Button onClick={() => setIsCreateModalOpen(true)}>
-            Create Request
-          </Button>
-        </div>
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          Create Request
+        </Button>
       </div>
 
       <DataTable
@@ -138,11 +128,11 @@ export default function EmpowermentPage() {
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
-        onRowClick={(request) => router.push(`/empowerment/${request.id}`)}
+        onRowClick={(request) => router.push(`/requests/${request.id}`)}
         rowActions={(request) => (
           <>
             <button
-              onClick={() => router.push(`/empowerment/${request.id}`)}
+              onClick={() => router.push(`/requests/${request.id}`)}
               className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
             >
               View Details
@@ -150,19 +140,13 @@ export default function EmpowermentPage() {
             {request.status === 'PENDING' && (
               <>
                 <button
-                  onClick={() => {
-                    setSelectedRequest(request);
-                    setIsApproveModalOpen(true);
-                  }}
+                  onClick={() => handleApprove(request.id)}
                   className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors"
                 >
                   Approve
                 </button>
                 <button
-                  onClick={() => {
-                    setSelectedRequest(request);
-                    setIsRejectModalOpen(true);
-                  }}
+                  onClick={() => handleReject(request.id)}
                   className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors text-red-600"
                 >
                   Reject
@@ -172,63 +156,23 @@ export default function EmpowermentPage() {
           </>
         )}
         loading={loading}
-        emptyMessage="No empowerment requests found. Get started by creating a new request."
+        emptyMessage="No requests found. Get started by creating a new request."
       />
 
       {/* Create Request Modal */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Create Empowerment Request"
-        size="lg"
+        title="Create Request"
+        size="md"
       >
-        <CreateEmpowermentForm
+        <RequestForm
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onSuccess={() => {
             refetch();
             setIsCreateModalOpen(false);
           }}
-        />
-      </Modal>
-
-      {/* Approve Modal */}
-      <Modal
-        isOpen={isApproveModalOpen}
-        onClose={() => setIsApproveModalOpen(false)}
-        title="Approve Empowerment Request"
-        size="md"
-      >
-        <ApproveEmpowermentForm
-          isOpen={isApproveModalOpen}
-          onClose={() => setIsApproveModalOpen(false)}
-          onSuccess={() => {
-            refetch();
-            setIsApproveModalOpen(false);
-            setSelectedRequest(null);
-          }}
-          empowermentId={selectedRequest?.id || ''}
-          action="approve"
-        />
-      </Modal>
-
-      {/* Reject Modal */}
-      <Modal
-        isOpen={isRejectModalOpen}
-        onClose={() => setIsRejectModalOpen(false)}
-        title="Reject Empowerment Request"
-        size="md"
-      >
-        <ApproveEmpowermentForm
-          isOpen={isRejectModalOpen}
-          onClose={() => setIsRejectModalOpen(false)}
-          onSuccess={() => {
-            refetch();
-            setIsRejectModalOpen(false);
-            setSelectedRequest(null);
-          }}
-          empowermentId={selectedRequest?.id || ''}
-          action="reject"
         />
       </Modal>
     </div>

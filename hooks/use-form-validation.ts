@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ZodSchema, ZodError } from 'zod';
+import { z, ZodSchema, ZodError } from 'zod';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -26,8 +26,8 @@ export function useFormValidation<T extends Record<string, any>>(
         // Create a partial object with just this field
         const partialData = { [fieldName]: value };
         
-        // Use Zod's safeParse with partial validation
-        const fieldSchema = schema.shape?.[fieldName as string];
+        // Use Zod's safeParse with partial validation (shape exists on ZodObject)
+        const fieldSchema = (schema as unknown as z.ZodObject<z.ZodRawShape>).shape?.[fieldName as string];
         if (fieldSchema) {
           fieldSchema.parse(value);
         } else {

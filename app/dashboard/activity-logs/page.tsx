@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ExportButton } from '@/components/tables';
 
 export default function ActivityLogsPage() {
-  const { data: logs, loading, error, refetch } = usePaginatedApi(
+  const { data: logs, loading, error, refetch } = usePaginatedApi<Record<string, unknown>>(
     activityLogsApi.getAll,
     { page: 1, limit: 50 }
   );
